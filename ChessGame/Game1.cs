@@ -59,6 +59,7 @@ namespace ChessGame
         protected override void Update(GameTime gameTime)
         {
             // TODO: Add your update logic here
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds; //placeholder for timer
 
             base.Update(gameTime);
         }
