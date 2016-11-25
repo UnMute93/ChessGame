@@ -13,14 +13,12 @@ namespace ChessGame.Classes
         public bool IsSelectable { get; set; }
         public abstract Texture2D Image { get; set; }
 
-        public Piece()
+        public Piece(Color color)
         {
-
+            Color = color;
+            IsSelectable = false;
         }
 
-        public void Draw()
-        {
-
-        }
+        public abstract void Draw();
     }
 }

@@ -20,7 +20,16 @@ namespace ChessGame.Classes
         public Piece PromotedPiece { get; set; }
         public MoveDirection MoveDirection { get; set; }
 
-        public Pawn() : base()
+        public Pawn(Color color) : base(color)
+        {
+            IsPromoted = false;
+            if (color == Color.White)
+                MoveDirection = MoveDirection.Up;
+            else
+                MoveDirection = MoveDirection.Down;
+        }
+
+        public override void Draw()
         {
 
         }

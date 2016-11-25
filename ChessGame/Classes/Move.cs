@@ -9,16 +9,22 @@ namespace ChessGame.Classes
     class Move
     {
         public int TurnNumber { get; set; }
-        public String WhiteMove { get; set; }
-        public String BlackMove { get; set; }
+        public Piece Piece { get; set; }
+        public Piece CapturedPiece { get; set; }
+        public Square FromSquare { get; set; }
+        public Square ToSquare { get; set; }
 
-        public Move(int turnNumber)
+        public Move(int turnNumber, Piece piece, Square fromSquare, Square toSquare)
         {
             TurnNumber = turnNumber;
-            WhiteMove = "";
-            BlackMove = "";
+            Piece = piece;
+            FromSquare = fromSquare;
+            ToSquare = toSquare;
         }
 
-        /* Check inputs, use chess notation */
+        public Move(int turnNumber, Piece piece, Piece capturedPiece, Square fromSquare, Square toSquare) : this(turnNumber, piece, fromSquare, toSquare)
+        {
+            CapturedPiece = capturedPiece;
+        }
     }
 }

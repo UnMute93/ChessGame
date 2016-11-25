@@ -12,7 +12,7 @@ namespace ChessGame.Classes
         Black
     }
 
-    enum CheckState
+    enum CheckStatus
     {
         None,
         WhiteCheckedBlack,
@@ -23,20 +23,26 @@ namespace ChessGame.Classes
 
     class Chess
     {
-        public Player Player1 { get; set; }
-        public Player Player2 { get; set; }
+        public Player[] Players { get; set; }
+        public Timer[] Timers { get; set; }
         public Board Board { get; set; }
         public List<Move> MoveHistory { get; set; }
         public Player ActivePlayer { get; set; }
-        public int TurnNumber { get; set; }
-        public CheckState CheckStatus { get; set; }
+        public CheckStatus CheckStatus { get; set; }
 
         public Chess()
         {
-
+            Players = new Player[2];
+            Players[0] = new Player("Player 1", Color.White);
+            Players[1] = new Player("Player 2", Color.Black);
+            Timers = new Timer[2];
+            Timers[0] = new Timer(100.0f, Color.White);
+            Timers[1] = new Timer(100.0f, Color.Black);
+            Board = new Board();
+            MoveHistory = new List<Move>();
         }
 
-        public bool IsValidMove(int xPos, int yPos, int xDest, int yDest)
+        public bool IsValidMove(Square fromSquare, Square toSquare)
         {
 
         }

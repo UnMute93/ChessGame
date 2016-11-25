@@ -11,7 +11,12 @@ namespace ChessGame.Classes
     {
         public override Texture2D Image { get; set; }
 
-        public Rook() : base()
+        public Rook(Color color) : base(color)
+        {
+
+        }
+
+        public override void Draw()
         {
 
         }

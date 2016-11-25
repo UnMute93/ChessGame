@@ -11,9 +11,14 @@ namespace ChessGame.Classes
     {
         public override Texture2D Image { get; set; }
 
-        public Bishop() : base()
+        public Bishop(Color color) : base(color)
         {
 
+        }
+
+        public override void Draw()
+        {
+            
         }
     }
 }

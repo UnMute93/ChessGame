@@ -17,14 +17,16 @@ namespace ChessGame.Classes
         public bool Finished { get; set; }
         public SpriteFont Font { get; set; }
         public Vector2 TextPosition { get; set; }
+        public Color Color { get; set; }
 
-        public Timer(float startTime)
+        public Timer(float startTime, Color color)
         {
             Time = startTime;
             Text = String.Format("{0}:{1:00}", (int)Time / 60, (int)Time % 60);
             Started = false;
             Paused = false;
             Finished = false;
+            Color = color;
         }
 
         public void Start()

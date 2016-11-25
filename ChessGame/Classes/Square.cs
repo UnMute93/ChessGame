@@ -8,17 +8,14 @@ namespace ChessGame.Classes
 {
     class Square
     {
+        public int Row { get; set; }
+        public int Column { get; set; }
         public Piece Piece { get; set; }
-        public Color Color { get; set; }
 
-        public Square()
+        public Square(int row, int column)
         {
-
-        }
-
-        public void Draw()
-        {
-
+            Row = row;
+            Column = column;
         }
     }
 }

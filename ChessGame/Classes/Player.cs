@@ -12,9 +12,10 @@ namespace ChessGame.Classes
         public Color Color { get; set; }
         public Timer Timer { get; set; }
 
-        public Player()
+        public Player(String name, Color color)
         {
-
+            Name = name;
+            Color = color;
         }
     }
 }
