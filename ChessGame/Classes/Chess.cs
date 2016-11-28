@@ -44,22 +44,22 @@ namespace ChessGame.Classes
 
         public bool IsValidMove(Square fromSquare, Square toSquare)
         {
-
+            return true;
         }
 
         public bool IsCheck()
         {
-
+            return true;
         }
 
         public bool IsCheckMate()
         {
-
+            return true;
         }
 
         public bool IsFinished()
         {
-
+            return true;
         }
     }
 }

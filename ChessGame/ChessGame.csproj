@@ -129,6 +129,23 @@
     <None Include="ChessGame_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Chess_Boards\BlackSquare.png" />
+    <Content Include="Assets\Chess_Boards\ChessBoard.png" />
+    <Content Include="Assets\Chess_Boards\ChessBoardWithSquares.png" />
+    <Content Include="Assets\Chess_Boards\Chess_Frame_dirty.png" />
+    <Content Include="Assets\Chess_Boards\WhiteSquare.png" />
+    <Content Include="Assets\Chess_Pieces\Black_Bishop.png" />
+    <Content Include="Assets\Chess_Pieces\Black_King.png" />
+    <Content Include="Assets\Chess_Pieces\Black_Knight.png" />
+    <Content Include="Assets\Chess_Pieces\Black_Pawn.png" />
+    <Content Include="Assets\Chess_Pieces\Black_Queen.png" />
+    <Content Include="Assets\Chess_Pieces\Black_rook.png" />
+    <Content Include="Assets\Chess_Pieces\White_Bishop.png" />
+    <Content Include="Assets\Chess_Pieces\White_King.png" />
+    <Content Include="Assets\Chess_Pieces\White_Knight.png" />
+    <Content Include="Assets\Chess_Pieces\White_Pawn.png" />
+    <Content Include="Assets\Chess_Pieces\White_Queen.png" />
+    <Content Include="Assets\Chess_Pieces\White_Rook.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
