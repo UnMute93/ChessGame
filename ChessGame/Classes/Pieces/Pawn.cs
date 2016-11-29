@@ -17,6 +17,7 @@ namespace ChessGame.Classes
     {
         public override Texture2D Image { get; set; }
         public bool IsPromoted { get; set; }
+        public bool UsedTwoSquareMove { get; set; }
         public Piece PromotedPiece { get; set; }
         public MoveDirection MoveDirection { get; set; }
 
@@ -27,6 +28,7 @@ namespace ChessGame.Classes
                 MoveDirection = MoveDirection.Up;
             else
                 MoveDirection = MoveDirection.Down;
+            Type = PieceType.Pawn;
         }
 
         public override void Draw()

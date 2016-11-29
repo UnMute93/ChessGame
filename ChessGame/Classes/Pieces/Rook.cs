@@ -13,7 +13,7 @@ namespace ChessGame.Classes
 
         public Rook(Color color) : base(color)
         {
-
+            Type = PieceType.Rook;
         }
 
         public override void Draw()

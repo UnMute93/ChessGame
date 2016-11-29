@@ -13,7 +13,7 @@ namespace ChessGame.Classes
 
         public King(Color color) : base(color)
         {
-
+            Type = PieceType.King;
         }
 
         public override void Draw()

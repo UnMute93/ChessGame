@@ -13,7 +13,7 @@ namespace ChessGame.Classes
 
         public Bishop(Color color) : base(color)
         {
-
+            Type = PieceType.Bishop;
         }
 
         public override void Draw()
