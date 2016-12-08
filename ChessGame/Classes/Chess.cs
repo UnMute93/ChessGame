@@ -33,6 +33,16 @@ namespace ChessGame.Classes
         public Player ActivePlayer { get; set; }
         public CheckStatus CheckStatus { get; set; }
 
+        /*
+                 * TODO start of every turn:
+                 * Switch Active Player
+                 * Make Pieces Selectable/Unselectable
+                 * Generate Pseudo Legal Moves
+                 * 
+                 * end of every turn:
+                 * if an opposing Pawn UsedTwoSquareMove == true, set false
+                 */
+
         public Chess()
         {
             Players = new Player[2];
@@ -45,14 +55,25 @@ namespace ChessGame.Classes
             MoveHistory = new List<Move>();
             ActivePlayer = Players[0];
             CheckStatus = CheckStatus.None;
+            GeneratePseudoLegalMoves();
+            foreach (Piece piece in Board.Pieces)
+            {
+                if (piece.Color == ActivePlayer.Color)
+                    piece.IsSelectable = true;
+                if (piece.Color != ActivePlayer.Color)
+                    piece.IsSelectable = false;
+            }
         }
 
-        /*public bool IsValidMove(Square fromSquare, Square toSquare)
+        public bool IsValidMove(Square fromSquare, Square toSquare)
         {
-
+            if (fromSquare.Piece.PseudoLegalMoves.Contains(toSquare))
+                // Legal Move Test
+                return true;
+            return false;
         }
 
-        public bool IsCheck(Square square)
+        /*public bool IsCheck(Square square)
         {
 
         }
@@ -67,9 +88,76 @@ namespace ChessGame.Classes
 
         }*/
 
-        public void MakeMove()
+        public bool MakeMove(Square fromSquare, Square toSquare)
         {
+            if (IsValidMove(fromSquare, toSquare))
+            {
+                Piece capturedPiece = null;
+                if (toSquare.Piece != null)
+                {
+                    capturedPiece = toSquare.Piece;
+                    Board.RemovedPieces.Add(toSquare.Piece);
+                    Board.Pieces.Remove(toSquare.Piece);
+                }
+                else if (fromSquare.Piece.Type == PieceType.Pawn)
+                {
+                    if (!fromSquare.Piece.HasMoved && (fromSquare.Row - toSquare.Row == 2 || fromSquare.Row - toSquare.Row == -2))
+                    {
+                        Pawn pawn = (Pawn)fromSquare.Piece;
+                        pawn.UsedTwoSquareMove = true;
+                    }
+                }
 
+                toSquare.Piece = fromSquare.Piece;
+                toSquare.Piece.HasMoved = true;
+                fromSquare.Piece = null;
+                AddToMoveHistory(fromSquare, toSquare, capturedPiece);
+                AdvanceTurn();
+                return true;
+            }
+            return false;
+        }
+
+        public void AddToMoveHistory(Square fromSquare, Square toSquare, Piece capturedPiece)
+        {
+            int turnNumber = 1;
+            if (MoveHistory.Count > 0)
+            {
+                if (MoveHistory.Last().Piece.Color == Color.White)
+                    turnNumber = MoveHistory.Last().TurnNumber;
+                else
+                    turnNumber = MoveHistory.Last().TurnNumber + 1;
+            }
+            if (capturedPiece == null)
+                MoveHistory.Add(new Move(turnNumber, toSquare.Piece, fromSquare, toSquare));
+            else
+                MoveHistory.Add(new Move(turnNumber, toSquare.Piece, capturedPiece, fromSquare, toSquare));
+        }
+
+        public void AdvanceTurn()
+        {
+            if (ActivePlayer == Players[0])
+                ActivePlayer = Players[1];
+            else
+                ActivePlayer = Players[0];
+
+            foreach (Piece piece in Board.Pieces)
+            {
+                if (piece.Color == ActivePlayer.Color)
+                    piece.IsSelectable = true;
+                if (piece.Color != ActivePlayer.Color)
+                {
+                    piece.IsSelectable = false;
+                    if (piece.Type == PieceType.Pawn)
+                    {
+                        Pawn pawn = (Pawn)piece;
+                        if (pawn.UsedTwoSquareMove)
+                            pawn.UsedTwoSquareMove = false;
+                    }
+                }
+            }
+
+            GeneratePseudoLegalMoves();
         }
 
         public List<Square> TraceDiagonal(Square square)
@@ -188,11 +276,11 @@ namespace ChessGame.Classes
         {
             List<Square> result = new List<Square>();
 
-            for (int i = square.Row - 1; i < square.Row + 1; i++)
+            for (int i = square.Row - 1; i < square.Row + 2; i++)
             {
-                for (int j = square.Column - 1; j < square.Column + 1; j++)
+                for (int j = square.Column - 1; j < square.Column + 2; j++)
                 {
-                    if (Board.Squares[i, j].Piece == null || Board.Squares[i, j].Piece.Color != ActivePlayer.Color)
+                    if ((i >= 0 && i <= 7 && j >= 0 && j <= 7) && (Board.Squares[i, j].Piece == null || Board.Squares[i, j].Piece.Color != ActivePlayer.Color))
                         result.Add(Board.Squares[i, j]);
                 }
             }
@@ -205,61 +293,29 @@ namespace ChessGame.Classes
             List<Square> result = new List<Square>();
             int x = square.Row, y = square.Column;
 
-            try
-            {
-                if (Board.Squares[x + 2, y + 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x + 2 <= 7 && y + 1 <= 7) && (Board.Squares[x + 2, y + 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x + 2, y + 1]);
 
-            try
-            {
-                if (Board.Squares[x + 2, y - 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x + 2 <= 7 && y - 1 >= 0) && (Board.Squares[x + 2, y - 1].Piece == null || Board.Squares[x + 2, y - 1].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x + 2, y - 1]);
 
-            try
-            {
-                if (Board.Squares[x - 2, y + 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x - 2 >= 0 && y + 1 <= 7) && (Board.Squares[x - 2, y + 1].Piece == null || Board.Squares[x - 2, y + 1].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x - 2, y + 1]);
 
-            try
-            {
-                if (Board.Squares[x - 2, y - 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x - 2 >= 0 && y - 1 >= 0) && (Board.Squares[x - 2, y - 1].Piece == null || Board.Squares[x - 2, y - 1].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x - 2, y - 1]);
 
-            try
-            {
-                if (Board.Squares[x + 1, y + 2].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x + 1 <= 7 && y + 2 <= 7) && (Board.Squares[x + 1, y + 2].Piece == null || Board.Squares[x + 1, y + 2].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x + 1, y + 2]);
 
-            try
-            {
-                if (Board.Squares[x + 1, y - 2].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x + 1 <= 7 && y - 2 >= 0) && (Board.Squares[x + 1, y - 2].Piece == null || Board.Squares[x + 1, y - 2].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x + 1, y - 2]);
 
-            try
-            {
-                if (Board.Squares[x - 1, y + 2].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x - 1 >= 0 && y + 2 <= 7) && (Board.Squares[x - 1, y + 2].Piece == null || Board.Squares[x - 1, y + 2].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x - 1, y + 2]);
 
-            try
-            {
-                if (Board.Squares[x - 1, y - 2].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color)
-                    result.Add(Board.Squares[x + 2, y + 1]);
-            }
-            catch (IndexOutOfRangeException e) { }
+            if ((x - 1 >= 0 && y - 2 >= 0) && (Board.Squares[x - 1, y - 2].Piece == null || Board.Squares[x - 1, y - 2].Piece.Color != ActivePlayer.Color))
+                result.Add(Board.Squares[x - 1, y - 2]);
 
             return result;
         }
@@ -308,95 +364,116 @@ namespace ChessGame.Classes
                                 else if (pawn.MoveDirection == MoveDirection.Up)
                                 {
                                     // Square directly in front
-                                    if (Board.Squares[i, j - 1].Piece == null)
-                                        result.Add(Board.Squares[i, j - 1]);
-                                    // Second square if not moved
-                                    if (!pawn.HasMoved && Board.Squares[i, j - 2].Piece == null)
-                                        result.Add(Board.Squares[i, j - 2]);
+                                    if ((i - 1 >= 0) && Board.Squares[i - 1, j].Piece == null)
+                                    {
+                                        result.Add(Board.Squares[i - 1, j]);
+
+                                        // Second square if not moved
+                                        if (!pawn.HasMoved && Board.Squares[i - 2, j].Piece == null)
+                                            result.Add(Board.Squares[i - 2, j]);
+                                    }
+
+                                    // Capture
+                                    if ((i - 1 >= 0 && j - 1 >= 0) && Board.Squares[i - 1, j - 1].Piece?.Color != ActivePlayer.Color)
+                                        result.Add(Board.Squares[i - 1, j - 1]);
+
+                                    if ((i - 1 >= 0 && j + 1 <= 7) && Board.Squares[i - 1, j + 1].Piece?.Color != ActivePlayer.Color)
+                                        result.Add(Board.Squares[i - 1, j + 1]);
+
                                     // En Passant
-                                    if (j == EN_PASSANT_ROW_WHITE)
+                                    if (i == EN_PASSANT_ROW_WHITE)
                                     {
                                         // The pawn able to be captured
                                         Pawn oppositePawn = null;
-                                        if (i == 0 && Board.Squares[i + 1, j].Piece?.Type == PieceType.Pawn)
+                                        if (j == 0 && Board.Squares[i, j + 1].Piece?.Type == PieceType.Pawn)
                                         {
-                                            oppositePawn = (Pawn)Board.Squares[i + 1, j].Piece;
+                                            oppositePawn = (Pawn)Board.Squares[i, j + 1].Piece;
                                             if (oppositePawn.UsedTwoSquareMove)
-                                                result.Add(Board.Squares[i + 1, j - 1]);
+                                                result.Add(Board.Squares[i - 1, j + 1]);
                                         }
-                                        else if (i == 7 && Board.Squares[i - 1, j].Piece?.Type == PieceType.Pawn)
+                                        else if (j == 7 && Board.Squares[i, j - 1].Piece?.Type == PieceType.Pawn)
                                         {
-                                            oppositePawn = (Pawn)Board.Squares[i - 1, j].Piece;
+                                            oppositePawn = (Pawn)Board.Squares[i, j - 1].Piece;
                                             if (oppositePawn.UsedTwoSquareMove)
                                                 result.Add(Board.Squares[i - 1, j - 1]);
                                         }
                                         else
                                         {
-                                            if (Board.Squares[i + 1, j].Piece?.Type == PieceType.Pawn)
+                                            if (Board.Squares[i, j + 1].Piece?.Type == PieceType.Pawn)
                                             {
-                                                oppositePawn = (Pawn)Board.Squares[i + 1, j].Piece;
+                                                oppositePawn = (Pawn)Board.Squares[i, j + 1].Piece;
                                                 if (oppositePawn.UsedTwoSquareMove)
-                                                    result.Add(Board.Squares[i + 1, j - 1]);
+                                                    result.Add(Board.Squares[i - 1, j + 1]);
                                             }
-                                            if (Board.Squares[i - 1, j].Piece?.Type == PieceType.Pawn)
+                                            if (Board.Squares[i, j - 1].Piece?.Type == PieceType.Pawn)
                                             {
-                                                oppositePawn = (Pawn)Board.Squares[i - 1, j].Piece;
+                                                oppositePawn = (Pawn)Board.Squares[i, j - 1].Piece;
                                                 if (oppositePawn.UsedTwoSquareMove)
                                                     result.Add(Board.Squares[i - 1, j - 1]);
                                             }
-
                                         }
                                     }
                                 }
                                 else
                                 {
                                     // Square directly in front
-                                    if (Board.Squares[i, j + 1].Piece == null)
-                                        result.Add(Board.Squares[i, j + 1]);
-                                    // Second square if not moved
-                                    if (!pawn.HasMoved && Board.Squares[i, j + 2].Piece == null)
-                                        result.Add(Board.Squares[i, j + 2]);
+                                    if ((i + 1 <= 7) && Board.Squares[i + 1, j].Piece == null)
+                                    {
+                                        result.Add(Board.Squares[i + 1, j]);
+
+                                        // Second square if not moved
+                                        if (!pawn.HasMoved && Board.Squares[i + 2, j].Piece == null)
+                                            result.Add(Board.Squares[i + 2, j]);
+                                    }
+
+                                    // Capture
+                                    if ((i + 1 <= 7 && j - 1 >= 0) && Board.Squares[i + 1, j - 1].Piece?.Color != ActivePlayer.Color)
+                                        result.Add(Board.Squares[i + 1, j - 1]);
+
+                                    if ((i + 1 <= 7 && j + 1 <= 7) && Board.Squares[i + 1, j + 1].Piece?.Color != ActivePlayer.Color)
+                                        result.Add(Board.Squares[i + 1, j + 1]);
+
                                     // En Passant
-                                    if (j == EN_PASSANT_ROW_BLACK)
+                                    if (i == EN_PASSANT_ROW_BLACK)
                                     {
                                         // The pawn able to be captured
                                         Pawn oppositePawn = null;
-                                        if (i == 0 && Board.Squares[i + 1, j].Piece?.Type == PieceType.Pawn)
+                                        if (j == 0 && Board.Squares[i, j + 1].Piece?.Type == PieceType.Pawn)
                                         {
-                                            oppositePawn = (Pawn)Board.Squares[i + 1, j].Piece;
+                                            oppositePawn = (Pawn)Board.Squares[i, j + 1].Piece;
                                             if (oppositePawn.UsedTwoSquareMove)
                                                 result.Add(Board.Squares[i + 1, j + 1]);
                                         }
-                                        else if (i == 7 && Board.Squares[i - 1, j].Piece?.Type == PieceType.Pawn)
+                                        else if (j == 7 && Board.Squares[i, j - 1].Piece?.Type == PieceType.Pawn)
                                         {
-                                            oppositePawn = (Pawn)Board.Squares[i - 1, j].Piece;
+                                            oppositePawn = (Pawn)Board.Squares[i, j - 1].Piece;
                                             if (oppositePawn.UsedTwoSquareMove)
-                                                result.Add(Board.Squares[i - 1, j + 1]);
+                                                result.Add(Board.Squares[i + 1, j - 1]);
                                         }
                                         else
                                         {
-                                            if (Board.Squares[i + 1, j].Piece?.Type == PieceType.Pawn)
+                                            if (Board.Squares[i, j + 1].Piece?.Type == PieceType.Pawn)
                                             {
-                                                oppositePawn = (Pawn)Board.Squares[i + 1, j].Piece;
+                                                oppositePawn = (Pawn)Board.Squares[i, j + 1].Piece;
                                                 if (oppositePawn.UsedTwoSquareMove)
                                                     result.Add(Board.Squares[i + 1, j + 1]);
                                             }
-                                            if (Board.Squares[i - 1, j].Piece?.Type == PieceType.Pawn)
+                                            if (Board.Squares[i, j - 1].Piece?.Type == PieceType.Pawn)
                                             {
-                                                oppositePawn = (Pawn)Board.Squares[i - 1, j].Piece;
+                                                oppositePawn = (Pawn)Board.Squares[i, j - 1].Piece;
                                                 if (oppositePawn.UsedTwoSquareMove)
-                                                    result.Add(Board.Squares[i - 1, j + 1]);
+                                                    result.Add(Board.Squares[i + 1, j - 1]);
                                             }
-
                                         }
                                     }
                                 }
+                                piece.PseudoLegalMoves = result;
                                 break;
                             case PieceType.Queen:
                                 piece.PseudoLegalMoves = TraceDiagonal(Board.Squares[i, j]).Concat(TraceRow(Board.Squares[i, j])).ToList();
                                 break;
                             case PieceType.Rook:
-                                piece.PseudoLegalMoves = TraceDiagonal(Board.Squares[i, j]);
+                                piece.PseudoLegalMoves = TraceRow(Board.Squares[i, j]);
                                 break;
                         }
                     }

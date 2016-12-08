@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ChessGame.Classes;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Input;
 
 namespace ChessGame
 {
@@ -11,11 +13,22 @@ namespace ChessGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Chess chess;
+        MouseState currentMouseState;
+        MouseState previousMouseState;
+
+        Square fromSquare;
+        Square toSquare;
+        Vector2 previousPiecePos;
+        Piece draggingPiece;
+
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+            chess = new Chess();
         }
 
         /// <summary>
@@ -29,6 +42,8 @@ namespace ChessGame
             // TODO: Add your initialization logic here
 
             base.Initialize();
+            currentMouseState = Mouse.GetState();
+            previousMouseState = Mouse.GetState();
         }
 
         /// <summary>
@@ -41,6 +56,16 @@ namespace ChessGame
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+
+            chess.Board.LoadContent(Content);
+            foreach (Square square in chess.Board.Squares)
+            {
+                square.LoadContent(Content);
+            }
+            foreach (Piece piece in chess.Board.Pieces)
+            {
+                piece.LoadContent(Content);
+            }
         }
 
         /// <summary>
@@ -61,7 +86,51 @@ namespace ChessGame
         {
             // TODO: Add your update logic here
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds; //placeholder for timer
-                
+            previousMouseState = currentMouseState;
+            currentMouseState = Mouse.GetState();
+            Vector2 mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
+            
+            // Clicked on piece
+            if (currentMouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton != ButtonState.Pressed)
+            {
+                foreach (Square square in chess.Board.Squares)
+                {
+                    // If within bounds of texture
+                    if (square.Piece != null && square.Piece.IsSelectable
+                        && mousePos.X >= square.ImagePos.X && mousePos.X <= square.ImagePos.X + square.Image.Width
+                        && mousePos.Y >= square.ImagePos.Y && mousePos.Y <= square.ImagePos.Y + square.Image.Height)
+                    {
+                        fromSquare = square;
+                        previousPiecePos = square.Piece.ImagePos;
+                        draggingPiece = square.Piece;
+                    }
+                }
+            }
+
+            if (draggingPiece != null)
+            {
+                draggingPiece.ImagePos = new Vector2(mousePos.X, mousePos.Y);
+            }
+
+            if (draggingPiece != null && currentMouseState.LeftButton == ButtonState.Released &&  previousMouseState.LeftButton != ButtonState.Released)
+            {
+                bool moveMade = false;
+                foreach (Square square in chess.Board.Squares)
+                {
+                    // If within bounds of texture
+                    if (mousePos.X >= square.ImagePos.X && mousePos.X <= square.ImagePos.X + square.Image.Width
+                        && mousePos.Y >= square.ImagePos.Y && mousePos.Y <= square.ImagePos.Y + square.Image.Height)
+                    {
+                        toSquare = square;
+                        if (chess.MakeMove(fromSquare, toSquare))
+                            moveMade = true;
+                    }
+                }
+                if (!moveMade)
+                    draggingPiece.ImagePos = previousPiecePos;
+
+                draggingPiece = null;
+            }
 
             base.Update(gameTime);
         }
@@ -75,6 +144,21 @@ namespace ChessGame
             GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+
+            spriteBatch.Begin(SpriteSortMode.BackToFront, null);
+            spriteBatch.Draw(chess.Board.Image, chess.Board.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 1);
+            foreach (Square square in chess.Board.Squares)
+            {
+                spriteBatch.Draw(square.Image, square.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.9f);
+            }
+            foreach (Piece piece in chess.Board.Pieces)
+            {
+                if (draggingPiece != null && piece == draggingPiece)
+                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
+                else
+                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.8f);
+            }
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

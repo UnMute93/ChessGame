@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +24,7 @@ namespace ChessGame.Classes
         public Color Color { get; set; }
         public bool IsSelectable { get; set; }
         public abstract Texture2D Image { get; set; }
+        public abstract Vector2 ImagePos { get; set; }
         public bool HasMoved { get; set; }
         public List<Square> PseudoLegalMoves { get; set; }
         public PieceType Type { get; set; }
@@ -34,6 +37,7 @@ namespace ChessGame.Classes
             PseudoLegalMoves = new List<Square>();
         }
 
+        public abstract void LoadContent(ContentManager content);
         public abstract void Draw();
     }
 }

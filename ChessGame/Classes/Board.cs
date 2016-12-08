@@ -1,9 +1,11 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace ChessGame.Classes
 {
@@ -11,18 +13,41 @@ namespace ChessGame.Classes
     {
         public Square[,] Squares { get; set; }
         public List<Piece> Pieces { get; set; }
+        public List<Piece> RemovedPieces { get; set; }
         public Texture2D Image { get; set; }
+        public Vector2 ImagePos { get; set; }
 
         public Board()
         {
             Squares = new Square[8, 8];
             Pieces = new List<Piece>();
+            RemovedPieces = new List<Piece>();
+            ImagePos = new Vector2(0, 0);
+
+            int vectorX = 30;
+            int vectorY = 30;
             for (int i = 0; i < Squares.GetLength(0); i++)
             {
                 for (int j = 0; j < Squares.GetLength(1); j++)
                 {
-                    Squares[i, j] = new Square(i, j);
+                    if (i % 2 == 0)
+                    {
+                        if (j % 2 == 0)
+                            Squares[i, j] = new Square(i, j, Color.White, new Vector2(vectorX, vectorY));
+                        else
+                            Squares[i, j] = new Square(i, j, Color.Black, new Vector2(vectorX, vectorY));
+                    }
+                    else
+                    {
+                        if (j % 2 != 0)
+                            Squares[i, j] = new Square(i, j, Color.White, new Vector2(vectorX, vectorY));
+                        else
+                            Squares[i, j] = new Square(i, j, Color.Black, new Vector2(vectorX, vectorY));
+                    }
+                    vectorX += 100;
                 }
+                vectorY += 100;
+                vectorX = 30;
             }
 
             Squares[0, 0].Piece = new Rook(Color.Black);
@@ -60,6 +85,11 @@ namespace ChessGame.Classes
                         Pieces.Add(Squares[i, j].Piece);
                 }
             }
+        }
+
+        public void LoadContent(ContentManager content)
+        {
+            Image = content.Load<Texture2D>("board");
         }
 
         public void Draw()

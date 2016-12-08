@@ -1,9 +1,11 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace ChessGame.Classes
 {
@@ -16,6 +18,7 @@ namespace ChessGame.Classes
     class Pawn : Piece
     {
         public override Texture2D Image { get; set; }
+        public override Vector2 ImagePos { get; set; }
         public bool IsPromoted { get; set; }
         public bool UsedTwoSquareMove { get; set; }
         public Piece PromotedPiece { get; set; }
@@ -29,6 +32,14 @@ namespace ChessGame.Classes
             else
                 MoveDirection = MoveDirection.Down;
             Type = PieceType.Pawn;
+        }
+
+        public override void LoadContent(ContentManager content)
+        {
+            if (Color == Color.White)
+                Image = content.Load<Texture2D>("pawn_white");
+            else
+                Image = content.Load<Texture2D>("pawn_black");
         }
 
         public override void Draw()

@@ -13,6 +13,7 @@ namespace ChessGame.Classes
         public Piece CapturedPiece { get; set; }
         public Square FromSquare { get; set; }
         public Square ToSquare { get; set; }
+        /* TODO Queenside/Kingside Castling, en passant, general notation in ToString() */
 
         public Move(int turnNumber, Piece piece, Square fromSquare, Square toSquare)
         {
@@ -26,5 +27,10 @@ namespace ChessGame.Classes
         {
             CapturedPiece = capturedPiece;
         }
+
+        /*public override String ToString()
+        {
+
+        }*/
     }
 }
