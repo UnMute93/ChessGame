@@ -17,15 +17,15 @@ namespace ChessGame.Classes
         public Texture2D Image { get; set; }
         public Vector2 ImagePos { get; set; }
 
-        public Board()
+        public Board(Vector2 scale)
         {
             Squares = new Square[8, 8];
             Pieces = new List<Piece>();
             RemovedPieces = new List<Piece>();
             ImagePos = new Vector2(0, 0);
 
-            int vectorX = 30;
-            int vectorY = 30;
+            int vectorX = (int)(30 * scale.X);
+            int vectorY = (int)(30 * scale.Y);
             for (int i = 0; i < Squares.GetLength(0); i++)
             {
                 for (int j = 0; j < Squares.GetLength(1); j++)
@@ -44,10 +44,10 @@ namespace ChessGame.Classes
                         else
                             Squares[i, j] = new Square(i, j, Color.Black, new Vector2(vectorX, vectorY));
                     }
-                    vectorX += 100;
+                    vectorX += (int)(100 * scale.X);
                 }
-                vectorY += 100;
-                vectorX = 30;
+                vectorY += (int)(100 * scale.Y);
+                vectorX = (int)(30 * scale.X);
             }
 
             Squares[0, 0].Piece = new Rook(Color.Black);

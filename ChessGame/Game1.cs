@@ -16,6 +16,7 @@ namespace ChessGame
         Chess chess;
         MouseState currentMouseState;
         MouseState previousMouseState;
+        Vector2 scale;
 
         Square fromSquare;
         Square toSquare;
@@ -29,7 +30,8 @@ namespace ChessGame
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            chess = new Chess();
+            scale = new Vector2(0.5f, 0.5f);
+            chess = new Chess(scale);
         }
 
         /// <summary>
@@ -148,17 +150,17 @@ namespace ChessGame
             // TODO: Add your drawing code here
 
             spriteBatch.Begin(SpriteSortMode.BackToFront, null);
-            spriteBatch.Draw(chess.Board.Image, chess.Board.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 1);
+            spriteBatch.Draw(chess.Board.Image, chess.Board.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 1);
             foreach (Square square in chess.Board.Squares)
             {
-                spriteBatch.Draw(square.Image, square.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.9f);
+                spriteBatch.Draw(square.Image, square.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.9f);
             }
             foreach (Piece piece in chess.Board.Pieces)
             {
                 if (draggingPiece != null && piece == draggingPiece)
-                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
+                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
                 else
-                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, null, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.8f);
+                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.8f);
             }
             spriteBatch.End();
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,7 +34,7 @@ namespace ChessGame.Classes
         public Player ActivePlayer { get; set; }
         public CheckStatus CheckStatus { get; set; }
 
-        public Chess()
+        public Chess(Vector2 scale)
         {
             Players = new Player[2];
             Players[0] = new Player("Player 1", Color.White);
@@ -41,7 +42,7 @@ namespace ChessGame.Classes
             Timers = new Timer[2];
             Timers[0] = new Timer(100.0f, Color.White);
             Timers[1] = new Timer(100.0f, Color.Black);
-            Board = new Board();
+            Board = new Board(scale);
             MoveHistory = new List<Move>();
             ActivePlayer = Players[0];
             CheckStatus = CheckStatus.None;
