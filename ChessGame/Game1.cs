@@ -30,7 +30,7 @@ namespace ChessGame
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            scale = new Vector2(0.5f, 0.5f);
+            scale = new Vector2(1f, 1f);
             chess = new Chess(scale);
         }
 
@@ -100,8 +100,8 @@ namespace ChessGame
                 {
                     // If within bounds of texture
                     if (square.Piece != null && square.Piece.IsSelectable
-                        && mousePos.X >= square.ImagePos.X && mousePos.X <= square.ImagePos.X + square.Image.Width
-                        && mousePos.Y >= square.ImagePos.Y && mousePos.Y <= square.ImagePos.Y + square.Image.Height)
+                        && mousePos.X >= square.ImagePos.X && mousePos.X <= square.ImagePos.X + (square.Image.Width * scale.X)
+                        && mousePos.Y >= square.ImagePos.Y && mousePos.Y <= square.ImagePos.Y + (square.Image.Height * scale.Y))
                     {
                         fromSquare = square;
                         previousPiecePos = square.Piece.ImagePos;
@@ -122,8 +122,8 @@ namespace ChessGame
                 foreach (Square square in chess.Board.Squares)
                 {
                     // If within bounds of texture
-                    if (mousePos.X >= square.ImagePos.X && mousePos.X <= square.ImagePos.X + square.Image.Width
-                        && mousePos.Y >= square.ImagePos.Y && mousePos.Y <= square.ImagePos.Y + square.Image.Height)
+                    if (mousePos.X >= square.ImagePos.X && mousePos.X <= square.ImagePos.X + (square.Image.Width * scale.X)
+                        && mousePos.Y >= square.ImagePos.Y && mousePos.Y <= square.ImagePos.Y + (square.Image.Height * scale.Y))
                     {
                         toSquare = square;
                         if (chess.MakeMove(fromSquare, toSquare))
