@@ -21,6 +21,7 @@ namespace ChessGame
         Square toSquare;
         Vector2 previousPiecePos;
         Piece draggingPiece;
+        Vector2 imageOffset;
 
 
         public Game1()
@@ -103,13 +104,14 @@ namespace ChessGame
                         fromSquare = square;
                         previousPiecePos = square.Piece.ImagePos;
                         draggingPiece = square.Piece;
+                        imageOffset = fromSquare.Piece.ImagePos - mousePos;
                     }
                 }
             }
 
             if (draggingPiece != null)
             {
-                draggingPiece.ImagePos = new Vector2(mousePos.X, mousePos.Y);
+                draggingPiece.ImagePos = mousePos + imageOffset;
             }
 
             if (draggingPiece != null && currentMouseState.LeftButton == ButtonState.Released &&  previousMouseState.LeftButton != ButtonState.Released)

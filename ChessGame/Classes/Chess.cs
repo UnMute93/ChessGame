@@ -33,16 +33,6 @@ namespace ChessGame.Classes
         public Player ActivePlayer { get; set; }
         public CheckStatus CheckStatus { get; set; }
 
-        /*
-                 * TODO start of every turn:
-                 * Switch Active Player
-                 * Make Pieces Selectable/Unselectable
-                 * Generate Pseudo Legal Moves
-                 * 
-                 * end of every turn:
-                 * if an opposing Pawn UsedTwoSquareMove == true, set false
-                 */
-
         public Chess()
         {
             Players = new Player[2];
@@ -68,8 +58,12 @@ namespace ChessGame.Classes
         public bool IsValidMove(Square fromSquare, Square toSquare)
         {
             if (fromSquare.Piece.PseudoLegalMoves.Contains(toSquare))
-                // Legal Move Test
+            // Legal Move Test
+            {
+
+
                 return true;
+            }
             return false;
         }
 
@@ -357,10 +351,10 @@ namespace ChessGame.Classes
                 }
 
                 // Capture
-                if ((x - 1 >= 0 && y - 1 >= 0) && Board.Squares[x - 1, y - 1].Piece?.Color != ActivePlayer.Color)
+                if ((x - 1 >= 0 && y - 1 >= 0) && Board.Squares[x - 1, y - 1].Piece != null && Board.Squares[x - 1, y - 1].Piece.Color != ActivePlayer.Color)
                     result.Add(Board.Squares[x - 1, y - 1]);
 
-                if ((x - 1 >= 0 && y + 1 <= 7) && Board.Squares[x - 1, y + 1].Piece?.Color != ActivePlayer.Color)
+                if ((x - 1 >= 0 && y + 1 <= 7) && Board.Squares[x - 1, y + 1].Piece != null && Board.Squares[x - 1, y + 1].Piece.Color != ActivePlayer.Color)
                     result.Add(Board.Squares[x - 1, y + 1]);
 
                 // En Passant
@@ -410,10 +404,10 @@ namespace ChessGame.Classes
                 }
 
                 // Capture
-                if ((x + 1 <= 7 && y - 1 >= 0) && Board.Squares[x + 1, y - 1].Piece?.Color != ActivePlayer.Color)
+                if ((x + 1 <= 7 && y - 1 >= 0) && Board.Squares[x + 1, y - 1].Piece != null && Board.Squares[x + 1, y - 1].Piece.Color != ActivePlayer.Color)
                     result.Add(Board.Squares[x + 1, y - 1]);
 
-                if ((x + 1 <= 7 && y + 1 <= 7) && Board.Squares[x + 1, y + 1].Piece?.Color != ActivePlayer.Color)
+                if ((x + 1 <= 7 && y + 1 <= 7) && Board.Squares[x + 1, y + 1].Piece != null && Board.Squares[x + 1, y + 1].Piece.Color != ActivePlayer.Color)
                     result.Add(Board.Squares[x + 1, y + 1]);
 
                 // En Passant
