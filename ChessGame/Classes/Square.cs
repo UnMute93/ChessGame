@@ -31,6 +31,7 @@ namespace ChessGame.Classes
         }
         public Color Color { get; set; }
         public Texture2D Image { get; set; }
+        public Texture2D SelectionImage { get; set; }
         public Vector2 ImagePos { get; set; }
 
         public Square(int row, int column, Color color, Vector2 imagePos)
@@ -43,6 +44,7 @@ namespace ChessGame.Classes
 
         public void LoadContent(ContentManager content)
         {
+            SelectionImage = content.Load<Texture2D>("square_selection");
             if (Color == Color.White)
                 Image = content.Load<Texture2D>("square_white");
             else

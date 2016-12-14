@@ -17,6 +17,7 @@ namespace ChessGame
         MouseState currentMouseState;
         MouseState previousMouseState;
         Vector2 scale;
+        Microsoft.Xna.Framework.Color squareTint;
 
         Square fromSquare;
         Square toSquare;
@@ -155,12 +156,19 @@ namespace ChessGame
             {
                 spriteBatch.Draw(square.Image, square.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.9f);
             }
+            if (draggingPiece != null)
+            {
+                foreach (Square square in draggingPiece.PseudoLegalMoves)
+                {
+                    spriteBatch.Draw(square.SelectionImage, square.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.8f);
+                }
+            }
             foreach (Piece piece in chess.Board.Pieces)
             {
                 if (draggingPiece != null && piece == draggingPiece)
-                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
+                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.6f);
                 else
-                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.8f);
+                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
             }
             spriteBatch.End();
 

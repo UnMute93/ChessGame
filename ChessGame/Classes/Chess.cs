@@ -451,6 +451,16 @@ namespace ChessGame.Classes
 
         public void GeneratePseudoLegalMoves()
         {
+            /*if (ActivePlayer.Color == Color.White && CheckStatus == CheckStatus.BlackCheckedWhite)
+            {
+
+            }
+            else if (ActivePlayer.Color == Color.Black && CheckStatus == CheckStatus.WhiteCheckedBlack)
+            {
+
+            }*/
+
+
             for (int i = 0; i < Board.Squares.GetLength(0); i++)
             {
                 for (int j = 0; j < Board.Squares.GetLength(1); j++)
