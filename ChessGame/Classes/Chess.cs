@@ -104,15 +104,25 @@ namespace ChessGame.Classes
             if (IsValidMove(fromSquare, toSquare))
             {
                 Piece capturedPiece = null;
+                Pawn pawn;
                 if (toSquare.Piece != null)
                 {
                     capturedPiece = toSquare.Piece;
                     Board.RemovedPieces.Add(capturedPiece);
                     Board.Pieces.Remove(capturedPiece);
+
+                    if (fromSquare.Piece.Type == PieceType.Pawn && (toSquare.Row == 0 || toSquare.Row == 7))
+                    {
+                        // TODO SELECTION
+                        pawn = (Pawn)fromSquare.Piece;
+                        pawn.IsPromoted = true;
+                        pawn.PromotedPiece = new Queen(pawn.Color, pawn.Square);
+                        pawn.PromotedPiece.LoadContent(Content);
+                    }
                 }
                 else if (fromSquare.Piece.Type == PieceType.Pawn)
                 {
-                    Pawn pawn = (Pawn)fromSquare.Piece;
+                    pawn = (Pawn)fromSquare.Piece;
                     Square enPassantSquare = FindEnPassant(fromSquare);
                     if (!fromSquare.Piece.HasMoved && (fromSquare.Row - toSquare.Row == 2 || fromSquare.Row - toSquare.Row == -2))
                         pawn.UsedTwoSquareMove = true;
