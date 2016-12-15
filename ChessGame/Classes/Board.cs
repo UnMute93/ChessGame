@@ -50,30 +50,30 @@ namespace ChessGame.Classes
                 vectorX = (int)(30 * scale.X);
             }
 
-            Squares[0, 0].Piece = new Rook(Color.Black);
-            Squares[0, 1].Piece = new Knight(Color.Black);
-            Squares[0, 2].Piece = new Bishop(Color.Black);
-            Squares[0, 3].Piece = new Queen(Color.Black);
-            Squares[0, 4].Piece = new King(Color.Black);
-            Squares[0, 5].Piece = new Bishop(Color.Black);
-            Squares[0, 6].Piece = new Knight(Color.Black);
-            Squares[0, 7].Piece = new Rook(Color.Black);
+            Squares[0, 0].Piece = new Rook(Color.Black, Squares[0, 0]);
+            Squares[0, 1].Piece = new Knight(Color.Black, Squares[0, 1]);
+            Squares[0, 2].Piece = new Bishop(Color.Black, Squares[0, 2]);
+            Squares[0, 3].Piece = new Queen(Color.Black, Squares[0, 3]);
+            Squares[0, 4].Piece = new King(Color.Black, Squares[0, 4]);
+            Squares[0, 5].Piece = new Bishop(Color.Black, Squares[0, 5]);
+            Squares[0, 6].Piece = new Knight(Color.Black, Squares[0, 6]);
+            Squares[0, 7].Piece = new Rook(Color.Black, Squares[0, 7]);
             for (int i = 0; i < Squares.GetLength(0); i++)
             {
-                Squares[1, i].Piece = new Pawn(Color.Black);
+                Squares[1, i].Piece = new Pawn(Color.Black, Squares[1, i]);
             }
 
-            Squares[7, 0].Piece = new Rook(Color.White);
-            Squares[7, 1].Piece = new Knight(Color.White);
-            Squares[7, 2].Piece = new Bishop(Color.White);
-            Squares[7, 3].Piece = new Queen(Color.White);
-            Squares[7, 4].Piece = new King(Color.White);
-            Squares[7, 5].Piece = new Bishop(Color.White);
-            Squares[7, 6].Piece = new Knight(Color.White);
-            Squares[7, 7].Piece = new Rook(Color.White);
+            Squares[7, 0].Piece = new Rook(Color.White, Squares[7, 0]);
+            Squares[7, 1].Piece = new Knight(Color.White, Squares[7, 1]);
+            Squares[7, 2].Piece = new Bishop(Color.White, Squares[7, 2]);
+            Squares[7, 3].Piece = new Queen(Color.White, Squares[7, 3]);
+            Squares[7, 4].Piece = new King(Color.White, Squares[7, 4]);
+            Squares[7, 5].Piece = new Bishop(Color.White, Squares[7, 5]);
+            Squares[7, 6].Piece = new Knight(Color.White, Squares[7, 6]);
+            Squares[7, 7].Piece = new Rook(Color.White, Squares[7, 7]);
             for (int i = 0; i < Squares.GetLength(1); i++)
             {
-                Squares[6, i].Piece = new Pawn(Color.White);
+                Squares[6, i].Piece = new Pawn(Color.White, Squares[6, i]);
             }
 
             // Add pieces to the Piece list for easy access.

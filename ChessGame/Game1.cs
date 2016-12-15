@@ -70,6 +70,7 @@ namespace ChessGame
             {
                 piece.LoadContent(Content);
             }
+            chess.Content = Content;
         }
 
         /// <summary>
@@ -165,10 +166,17 @@ namespace ChessGame
             }
             foreach (Piece piece in chess.Board.Pieces)
             {
+                Texture2D image = piece.Image;
+                if (piece.Type == PieceType.Pawn)
+                {
+                    Pawn pawn = (Pawn)piece;
+                    if (pawn.IsPromoted)
+                        image = pawn.PromotedPiece.Image;
+                }
                 if (draggingPiece != null && piece == draggingPiece)
-                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.6f);
+                    spriteBatch.Draw(image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.6f);
                 else
-                    spriteBatch.Draw(piece.Image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
+                    spriteBatch.Draw(image, piece.ImagePos, null, null, null, 0, scale, Microsoft.Xna.Framework.Color.White, SpriteEffects.None, 0.7f);
             }
             spriteBatch.End();
 

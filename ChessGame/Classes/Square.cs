@@ -23,6 +23,7 @@ namespace ChessGame.Classes
                 if (value != null)
                 {
                     value.ImagePos = this.ImagePos;
+                    value.Square = this;
                     piece = value;
                 }
                 else

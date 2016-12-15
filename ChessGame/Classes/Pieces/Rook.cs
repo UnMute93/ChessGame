@@ -14,7 +14,7 @@ namespace ChessGame.Classes
         public override Texture2D Image { get; set; }
         public override Vector2 ImagePos { get; set; }
 
-        public Rook(Color color) : base(color)
+        public Rook(Color color, Square square) : base(color, square)
         {
             Type = PieceType.Rook;
         }

@@ -24,7 +24,7 @@ namespace ChessGame.Classes
         public Piece PromotedPiece { get; set; }
         public MoveDirection MoveDirection { get; set; }
 
-        public Pawn(Color color) : base(color)
+        public Pawn(Color color, Square square) : base(color, square)
         {
             IsPromoted = false;
             if (color == Color.White)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,7 @@ namespace ChessGame.Classes
         public List<Move> MoveHistory { get; set; }
         public Player ActivePlayer { get; set; }
         public CheckStatus CheckStatus { get; set; }
+        public ContentManager Content { get; set; }
 
         public Chess(Vector2 scale)
         {
@@ -59,9 +61,23 @@ namespace ChessGame.Classes
         public bool IsValidMove(Square fromSquare, Square toSquare)
         {
             if (fromSquare.Piece.PseudoLegalMoves.Contains(toSquare))
-            // Legal Move Test
             {
+                /*if ((ActivePlayer.Color == Color.White && CheckStatus == CheckStatus.BlackCheckedWhite) ||
+                (ActivePlayer.Color == Color.Black && CheckStatus == CheckStatus.WhiteCheckedBlack))
+                {
+                    Piece attackedKing = null;
 
+                    foreach (Piece piece in Board.Pieces)
+                    {
+                        if (piece.Type == PieceType.King && piece.Color == ActivePlayer.Color)
+                            attackedKing = piece;
+                    }
+
+                    if (attackedKing != null && IsSquareAttacked(attackedKing.Square))
+                    {
+
+                    }
+                }*/
 
                 return true;
             }
@@ -91,21 +107,72 @@ namespace ChessGame.Classes
                 if (toSquare.Piece != null)
                 {
                     capturedPiece = toSquare.Piece;
-                    Board.RemovedPieces.Add(toSquare.Piece);
-                    Board.Pieces.Remove(toSquare.Piece);
+                    Board.RemovedPieces.Add(capturedPiece);
+                    Board.Pieces.Remove(capturedPiece);
                 }
                 else if (fromSquare.Piece.Type == PieceType.Pawn)
                 {
+                    Pawn pawn = (Pawn)fromSquare.Piece;
+                    Square enPassantSquare = FindEnPassant(fromSquare);
                     if (!fromSquare.Piece.HasMoved && (fromSquare.Row - toSquare.Row == 2 || fromSquare.Row - toSquare.Row == -2))
-                    {
-                        Pawn pawn = (Pawn)fromSquare.Piece;
                         pawn.UsedTwoSquareMove = true;
+                    else if (enPassantSquare == toSquare)
+                    {
+                        if (fromSquare.Piece.Color == Color.White)
+                            capturedPiece = Board.Squares[toSquare.Row + 1, toSquare.Column].Piece;
+                        else if (fromSquare.Piece.Color == Color.Black)
+                            capturedPiece = Board.Squares[toSquare.Row - 1, toSquare.Column].Piece;
+                        Board.RemovedPieces.Add(capturedPiece);
+                        Board.Pieces.Remove(capturedPiece);
+                    }
+                    else if (toSquare.Row == 0 || toSquare.Row == 7)
+                    {
+                        // TODO SELECTION
+                        pawn.IsPromoted = true;
+                        pawn.PromotedPiece = new Queen(pawn.Color, pawn.Square);
+                        pawn.PromotedPiece.LoadContent(Content);
+                    }
+                }
+                // Castling
+                else if (fromSquare.Piece.Type == PieceType.King)
+                {
+                    Square rookSquare = null;
+                    if (fromSquare.Column - toSquare.Column == 2)
+                    {
+                        rookSquare = Board.Squares[fromSquare.Row, fromSquare.Column - 4];
+                        rookSquare.Piece.HasMoved = true;
+                        Board.Squares[fromSquare.Row, fromSquare.Column - 1].Piece = rookSquare.Piece;
+                        rookSquare.Piece = null;
+                        
+                    }
+                    else if (fromSquare.Column - toSquare.Column == -2)
+                    {
+                        rookSquare = Board.Squares[fromSquare.Row, fromSquare.Column + 3];
+                        rookSquare.Piece.HasMoved = true;
+                        Board.Squares[fromSquare.Row, fromSquare.Column + 1].Piece = rookSquare.Piece;
+                        rookSquare.Piece = null;
                     }
                 }
 
                 toSquare.Piece = fromSquare.Piece;
                 toSquare.Piece.HasMoved = true;
                 fromSquare.Piece = null;
+
+                Square oppositeKingSquare = null;
+                foreach (Piece piece in Board.Pieces)
+                {
+                    if (piece.Type == PieceType.King && piece.Color != ActivePlayer.Color)
+                        oppositeKingSquare = piece.Square;
+                }
+                if (IsSquareAttacked(oppositeKingSquare))
+                {
+                    if (ActivePlayer.Color == Color.White)
+                        CheckStatus = CheckStatus.WhiteCheckedBlack;
+                    else
+                        CheckStatus = CheckStatus.BlackCheckedWhite;
+                }
+
+
                 AddToMoveHistory(fromSquare, toSquare, capturedPiece);
                 AdvanceTurn();
                 return true;
@@ -139,10 +206,8 @@ namespace ChessGame.Classes
             foreach (Piece piece in Board.Pieces)
             {
                 if (piece.Color == ActivePlayer.Color)
-                    piece.IsSelectable = true;
-                if (piece.Color != ActivePlayer.Color)
                 {
-                    piece.IsSelectable = false;
+                    piece.IsSelectable = true;
                     if (piece.Type == PieceType.Pawn)
                     {
                         Pawn pawn = (Pawn)piece;
@@ -150,6 +215,8 @@ namespace ChessGame.Classes
                             pawn.UsedTwoSquareMove = false;
                     }
                 }
+                if (piece.Color != ActivePlayer.Color)
+                    piece.IsSelectable = false;
             }
 
             GeneratePseudoLegalMoves();
@@ -280,6 +347,31 @@ namespace ChessGame.Classes
                 }
             }
 
+            // Castling
+            if (!square.Piece.HasMoved)
+            {
+                if (Board.Squares[square.Row, square.Column + 1].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column + 1])
+                    && Board.Squares[square.Row, square.Column + 2].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column + 2]))
+                {
+                    if ((square.Piece.Color == Color.White && Board.Squares[7, 7].Piece != null && !Board.Squares[7, 7].Piece.HasMoved)
+                        || (square.Piece.Color == Color.Black && Board.Squares[0, 7].Piece != null && !Board.Squares[0, 7].Piece.HasMoved))
+                    {
+                        result.Add(Board.Squares[square.Row, square.Column + 2]);
+                    }
+                }
+
+                if (Board.Squares[square.Row, square.Column - 1].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 1])
+                    && Board.Squares[square.Row, square.Column - 2].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 2])
+                    && Board.Squares[square.Row, square.Column - 3].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 3]))
+                {
+                    if ((square.Piece.Color == Color.White && Board.Squares[7, 0].Piece != null && !Board.Squares[7, 0].Piece.HasMoved)
+                        || (square.Piece.Color == Color.Black && Board.Squares[0, 0].Piece != null && !Board.Squares[0, 0].Piece.HasMoved))
+                    {
+                        result.Add(Board.Squares[square.Row, square.Column - 2]);
+                    }
+                }
+            }
+
             return result;
         }
 
@@ -357,40 +449,6 @@ namespace ChessGame.Classes
 
                 if ((x - 1 >= 0 && y + 1 <= 7) && Board.Squares[x - 1, y + 1].Piece != null && Board.Squares[x - 1, y + 1].Piece.Color != ActivePlayer.Color)
                     result.Add(Board.Squares[x - 1, y + 1]);
-
-                // En Passant
-                if (x == EN_PASSANT_ROW_WHITE)
-                {
-                    // The pawn able to be captured
-                    Pawn oppositePawn = null;
-                    if (y == 0 && Board.Squares[x, y + 1].Piece?.Type == PieceType.Pawn)
-                    {
-                        oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
-                        if (oppositePawn.UsedTwoSquareMove)
-                            result.Add(Board.Squares[x - 1, y + 1]);
-                    }
-                    else if (y == 7 && Board.Squares[x, y - 1].Piece?.Type == PieceType.Pawn)
-                    {
-                        oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
-                        if (oppositePawn.UsedTwoSquareMove)
-                            result.Add(Board.Squares[x - 1, y - 1]);
-                    }
-                    else
-                    {
-                        if (Board.Squares[x, y + 1].Piece?.Type == PieceType.Pawn)
-                        {
-                            oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
-                            if (oppositePawn.UsedTwoSquareMove)
-                                result.Add(Board.Squares[x - 1, y + 1]);
-                        }
-                        if (Board.Squares[x, y - 1].Piece?.Type == PieceType.Pawn)
-                        {
-                            oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
-                            if (oppositePawn.UsedTwoSquareMove)
-                                result.Add(Board.Squares[x - 1, y - 1]);
-                        }
-                    }
-                }
             }
             else
             {
@@ -410,86 +468,145 @@ namespace ChessGame.Classes
 
                 if ((x + 1 <= 7 && y + 1 <= 7) && Board.Squares[x + 1, y + 1].Piece != null && Board.Squares[x + 1, y + 1].Piece.Color != ActivePlayer.Color)
                     result.Add(Board.Squares[x + 1, y + 1]);
-
-                // En Passant
-                if (x == EN_PASSANT_ROW_BLACK)
-                {
-                    // The pawn able to be captured
-                    Pawn oppositePawn = null;
-                    if (y == 0 && Board.Squares[x, y + 1].Piece?.Type == PieceType.Pawn)
-                    {
-                        oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
-                        if (oppositePawn.UsedTwoSquareMove)
-                            result.Add(Board.Squares[x + 1, y + 1]);
-                    }
-                    else if (y == 7 && Board.Squares[x, y - 1].Piece?.Type == PieceType.Pawn)
-                    {
-                        oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
-                        if (oppositePawn.UsedTwoSquareMove)
-                            result.Add(Board.Squares[x + 1, y - 1]);
-                    }
-                    else
-                    {
-                        if (Board.Squares[x, y + 1].Piece?.Type == PieceType.Pawn)
-                        {
-                            oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
-                            if (oppositePawn.UsedTwoSquareMove)
-                                result.Add(Board.Squares[x + 1, y + 1]);
-                        }
-                        if (Board.Squares[x, y - 1].Piece?.Type == PieceType.Pawn)
-                        {
-                            oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
-                            if (oppositePawn.UsedTwoSquareMove)
-                                result.Add(Board.Squares[x + 1, y - 1]);
-                        }
-                    }
-                }
+            }
+            if (!pawn.IsPromoted)
+            {
+                Square enPassantSquare = FindEnPassant(square);
+                if (enPassantSquare != null)
+                    result.Add(enPassantSquare);
             }
 
             return result;
         }
 
-        public void GeneratePseudoLegalMoves()
+        public Square FindEnPassant(Square square)
         {
-            /*if (ActivePlayer.Color == Color.White && CheckStatus == CheckStatus.BlackCheckedWhite)
+            if (square.Piece.Type == PieceType.Pawn)
             {
+                int x = square.Row;
+                int y = square.Column;
 
-            }
-            else if (ActivePlayer.Color == Color.Black && CheckStatus == CheckStatus.WhiteCheckedBlack)
-            {
-
-            }*/
-
-
-            for (int i = 0; i < Board.Squares.GetLength(0); i++)
-            {
-                for (int j = 0; j < Board.Squares.GetLength(1); j++)
+                if (x == EN_PASSANT_ROW_WHITE && square.Piece.Color == Color.White)
                 {
-                    Piece piece = Board.Squares[i, j].Piece;
-                    if (piece != null && piece.Color == ActivePlayer.Color)
+                    // The pawn able to be captured
+                    Pawn oppositePawn = null;
+                    if (y == 0 && Board.Squares[x, y + 1].Piece != null && Board.Squares[x, y + 1].Piece.Type == PieceType.Pawn)
                     {
-                        switch (piece.Type)
+                        oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
+                        if (oppositePawn.UsedTwoSquareMove)
+                            return Board.Squares[x - 1, y + 1];
+                    }
+                    else if (y == 7 && Board.Squares[x, y - 1].Piece != null && Board.Squares[x, y - 1].Piece.Type == PieceType.Pawn)
+                    {
+                        oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
+                        if (oppositePawn.UsedTwoSquareMove)
+                            return Board.Squares[x - 1, y - 1];
+                    }
+                    else
+                    {
+                        if (Board.Squares[x, y + 1].Piece != null && Board.Squares[x, y + 1].Piece.Type == PieceType.Pawn)
                         {
-                            case PieceType.Bishop:
-                                piece.PseudoLegalMoves = TraceDiagonal(Board.Squares[i, j]);
-                                break;
-                            case PieceType.King:
-                                piece.PseudoLegalMoves = FindKingMoves(Board.Squares[i, j]);
-                                break;
-                            case PieceType.Knight:
-                                piece.PseudoLegalMoves = FindKnightMoves(Board.Squares[i, j]);
-                                break;
-                            case PieceType.Pawn:
-                                piece.PseudoLegalMoves = FindPawnMoves(Board.Squares[i, j]);
-                                break;
-                            case PieceType.Queen:
-                                piece.PseudoLegalMoves = TraceDiagonal(Board.Squares[i, j]).Concat(TraceRow(Board.Squares[i, j])).ToList();
-                                break;
-                            case PieceType.Rook:
-                                piece.PseudoLegalMoves = TraceRow(Board.Squares[i, j]);
-                                break;
+                            oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
+                            if (oppositePawn.UsedTwoSquareMove)
+                                return Board.Squares[x - 1, y + 1];
+                        }
+                        if (Board.Squares[x, y - 1].Piece != null && Board.Squares[x, y - 1].Piece.Type == PieceType.Pawn)
+                        {
+                            oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
+                            if (oppositePawn.UsedTwoSquareMove)
+                                return Board.Squares[x - 1, y - 1];
                         }
                     }
+                }
+
+                if (x == EN_PASSANT_ROW_BLACK && square.Piece.Color == Color.Black)
+                {
+                    // The pawn able to be captured
+                    Pawn oppositePawn = null;
+                    if (y == 0 && Board.Squares[x, y + 1].Piece != null && Board.Squares[x, y + 1].Piece.Type == PieceType.Pawn)
+                    {
+                        oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
+                        if (oppositePawn.UsedTwoSquareMove)
+                            return Board.Squares[x + 1, y + 1];
+                    }
+                    else if (y == 7 && Board.Squares[x, y - 1].Piece != null && Board.Squares[x, y - 1].Piece.Type == PieceType.Pawn)
+                    {
+                        oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
+                        if (oppositePawn.UsedTwoSquareMove)
+                            return Board.Squares[x + 1, y - 1];
+                    }
+                    else
+                    {
+                        if (Board.Squares[x, y + 1].Piece != null && Board.Squares[x, y + 1].Piece.Type == PieceType.Pawn)
+                        {
+                            oppositePawn = (Pawn)Board.Squares[x, y + 1].Piece;
+                            if (oppositePawn.UsedTwoSquareMove)
+                                return Board.Squares[x + 1, y + 1];
+                        }
+                        if (Board.Squares[x, y - 1].Piece != null && Board.Squares[x, y - 1].Piece.Type == PieceType.Pawn)
+                        {
+                            oppositePawn = (Pawn)Board.Squares[x, y - 1].Piece;
+                            if (oppositePawn.UsedTwoSquareMove)
+                                return Board.Squares[x + 1, y - 1];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public bool IsSquareAttacked(Square square)
+        {
+            List<Square> diagonalAttacks = TraceDiagonal(square);
+            List<Square> rowAttacks = TraceRow(square);
+            List<Square> knightAttacks = FindKnightMoves(square);
+
+            foreach (Square s in diagonalAttacks)
+            {
+                if (s.Piece != null && (s.Piece.Type == PieceType.Bishop || s.Piece.Type == PieceType.Pawn || s.Piece.Type == PieceType.Queen))
+                    return true;
+            }
+
+            foreach (Square s in rowAttacks)
+            {
+                if (s.Piece != null && (s.Piece.Type == PieceType.Rook || s.Piece.Type == PieceType.Queen))
+                    return true;
+            }
+
+            foreach (Square s in knightAttacks)
+            {
+                if (s.Piece != null && s.Piece.Type == PieceType.Knight)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void GeneratePseudoLegalMoves()
+        {
+        foreach (Piece piece in Board.Pieces)
+            if (piece.Color == ActivePlayer.Color)
+            {
+                switch (piece.Type)
+                {
+                    case PieceType.Bishop:
+                        piece.PseudoLegalMoves = TraceDiagonal(piece.Square);
+                        break;
+                    case PieceType.King:
+                        piece.PseudoLegalMoves = FindKingMoves(piece.Square);
+                        break;
+                    case PieceType.Knight:
+                        piece.PseudoLegalMoves = FindKnightMoves(piece.Square);
+                        break;
+                    case PieceType.Pawn:
+                        piece.PseudoLegalMoves = FindPawnMoves(piece.Square);
+                        break;
+                    case PieceType.Queen:
+                        piece.PseudoLegalMoves = TraceDiagonal(piece.Square).Concat(TraceRow(piece.Square)).ToList();
+                        break;
+                    case PieceType.Rook:
+                        piece.PseudoLegalMoves = TraceRow(piece.Square);
+                        break;
                 }
             }
         }

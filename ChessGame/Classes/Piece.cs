@@ -28,13 +28,15 @@ namespace ChessGame.Classes
         public bool HasMoved { get; set; }
         public List<Square> PseudoLegalMoves { get; set; }
         public PieceType Type { get; set; }
+        public Square Square { get; set; }
 
-        public Piece(Color color)
+        public Piece(Color color, Square square)
         {
             Color = color;
             IsSelectable = false;
             HasMoved = false;
             PseudoLegalMoves = new List<Square>();
+            Square = square;
         }
 
         public abstract void LoadContent(ContentManager content);
