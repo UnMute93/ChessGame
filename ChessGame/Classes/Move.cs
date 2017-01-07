@@ -13,24 +13,125 @@ namespace ChessGame.Classes
         public Piece CapturedPiece { get; set; }
         public Square FromSquare { get; set; }
         public Square ToSquare { get; set; }
-        /* TODO Queenside/Kingside Castling, en passant, general notation in ToString() */
 
-        public Move(int turnNumber, Piece piece, Square fromSquare, Square toSquare)
+        public bool QueensideCastle { get; set; }
+        public bool KingsideCastle { get; set; }
+        public CheckStatus CheckStatus { get; set; }
+        /* TODO Disambiguating moves in ToString */
+
+        public Move(int turnNumber, Piece piece, Square fromSquare, Square toSquare, bool queensideCastle, bool kingsideCastle, CheckStatus checkStatus)
         {
             TurnNumber = turnNumber;
             Piece = piece;
             FromSquare = fromSquare;
             ToSquare = toSquare;
+
+            QueensideCastle = queensideCastle;
+            KingsideCastle = kingsideCastle;
+            CheckStatus = checkStatus;
         }
 
-        public Move(int turnNumber, Piece piece, Piece capturedPiece, Square fromSquare, Square toSquare) : this(turnNumber, piece, fromSquare, toSquare)
+        public Move(int turnNumber, Piece piece, Piece capturedPiece, Square fromSquare, Square toSquare, bool queensideCastle, bool kingsideCastle, CheckStatus checkStatus) : this(turnNumber, piece, fromSquare, toSquare, queensideCastle, kingsideCastle, checkStatus)
         {
             CapturedPiece = capturedPiece;
         }
 
-        /*public override String ToString()
+        public override String ToString()
         {
+            if (QueensideCastle)
+                return "0-0-0";
+            else if (KingsideCastle)
+                return "0-0";
 
-        }*/
+            String result = "";
+
+            switch (FromSquare.Piece.Type)
+            {
+                case PieceType.Bishop:
+                    result += "B";
+                    break;
+                case PieceType.King:
+                    result += "B";
+                    break;
+                case PieceType.Knight:
+                    result += "B";
+                    break;
+                case PieceType.Pawn:
+                    result += "B";
+                    break;
+                case PieceType.Queen:
+                    result += "B";
+                    break;
+                case PieceType.Rook:
+                    result += "B";
+                    break;
+            }
+
+            if (CapturedPiece != null)
+                result += "x";
+
+            if (FromSquare.)switch (ToSquare.Column)
+            {
+                case 0:
+                    result += "a";
+                    break;
+                case 1:
+                    result += "b";
+                    break;
+                case 2:
+                    result += "c";
+                    break;
+                case 3:
+                    result += "d";
+                    break;
+                case 4:
+                    result += "e";
+                    break;
+                case 5:
+                    result += "f";
+                    break;
+                case 6:
+                    result += "g";
+                    break;
+                case 7:
+                    result += "h";
+                    break;
+            }
+
+            switch (ToSquare.Row)
+            {
+                case 0:
+                    result += "8";
+                    break;
+                case 1:
+                    result += "7";
+                    break;
+                case 2:
+                    result += "6";
+                    break;
+                case 3:
+                    result += "5";
+                    break;
+                case 4:
+                    result += "4";
+                    break;
+                case 5:
+                    result += "3";
+                    break;
+                case 6:
+                    result += "2";
+                    break;
+                case 7:
+                    result += "1";
+                    break;
+            }
+
+            if ((FromSquare.Piece.Color == Color.White && CheckStatus == CheckStatus.WhiteCheckedBlack) || (FromSquare.Piece.Color == Color.Black && CheckStatus == CheckStatus.BlackCheckedWhite))
+                result += "+";
+            else if ((FromSquare.Piece.Color == Color.White && CheckStatus == CheckStatus.WhiteCheckmatedBlack) || (FromSquare.Piece.Color == Color.Black && CheckStatus == CheckStatus.BlackCheckmatedWhite))
+                result += "#";
+
+            return result;
+        }
     }
 }

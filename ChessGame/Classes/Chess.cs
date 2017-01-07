@@ -84,17 +84,43 @@ namespace ChessGame.Classes
             return false;
         }
 
-        /*public bool IsCheck(Square square)
+        public bool IsCheck(Square square)
         {
-
+            if (square != null && IsSquareAttacked(square, square.Piece.Color))
+            {
+                if (ActivePlayer.Color == Color.White)
+                {
+                    CheckStatus = CheckStatus.WhiteCheckedBlack;
+                    return true;
+                }
+                else
+                {
+                    CheckStatus = CheckStatus.BlackCheckedWhite;
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool IsCheckMate()
         {
+            if (CheckStatus == CheckStatus.WhiteCheckedBlack)
+            {
+                Piece king = null;
+                foreach (Piece piece in Board.Pieces)
+                {
+                    if (piece.Type == PieceType.King && piece.Color == Color.Black)
+                        king = piece;
+                }
+            }
+            else if (CheckStatus == CheckStatus.BlackCheckedWhite)
+            {
 
+            }
+            return false;
         }
 
-        public bool IsFinished()
+        /*public bool IsFinished()
         {
 
         }*/
@@ -103,6 +129,9 @@ namespace ChessGame.Classes
         {
             if (IsValidMove(fromSquare, toSquare))
             {
+                bool kingsideCastle = false;
+                bool queensideCastle = false;
+
                 Piece capturedPiece = null;
                 Pawn pawn;
                 if (toSquare.Piece != null)
@@ -153,6 +182,7 @@ namespace ChessGame.Classes
                         rookSquare.Piece.HasMoved = true;
                         Board.Squares[fromSquare.Row, fromSquare.Column - 1].Piece = rookSquare.Piece;
                         rookSquare.Piece = null;
+                        queensideCastle = true;
                         
                     }
                     else if (fromSquare.Column - toSquare.Column == -2)
@@ -161,6 +191,7 @@ namespace ChessGame.Classes
                         rookSquare.Piece.HasMoved = true;
                         Board.Squares[fromSquare.Row, fromSquare.Column + 1].Piece = rookSquare.Piece;
                         rookSquare.Piece = null;
+                        kingsideCastle = true;
                     }
                 }
 
@@ -174,23 +205,17 @@ namespace ChessGame.Classes
                     if (piece.Type == PieceType.King && piece.Color != ActivePlayer.Color)
                         oppositeKingSquare = piece.Square;
                 }
-                if (IsSquareAttacked(oppositeKingSquare))
-                {
-                    if (ActivePlayer.Color == Color.White)
-                        CheckStatus = CheckStatus.WhiteCheckedBlack;
-                    else
-                        CheckStatus = CheckStatus.BlackCheckedWhite;
-                }
+                IsCheck(oppositeKingSquare);
 
 
-                AddToMoveHistory(fromSquare, toSquare, capturedPiece);
+                AddToMoveHistory(fromSquare, toSquare, capturedPiece, queensideCastle, kingsideCastle, CheckStatus);
                 AdvanceTurn();
                 return true;
             }
             return false;
         }
 
-        public void AddToMoveHistory(Square fromSquare, Square toSquare, Piece capturedPiece)
+        public void AddToMoveHistory(Square fromSquare, Square toSquare, Piece capturedPiece, bool queensideCastle, bool kingsideCastle, CheckStatus checkStatus)
         {
             int turnNumber = 1;
             if (MoveHistory.Count > 0)
@@ -201,9 +226,9 @@ namespace ChessGame.Classes
                     turnNumber = MoveHistory.Last().TurnNumber + 1;
             }
             if (capturedPiece == null)
-                MoveHistory.Add(new Move(turnNumber, toSquare.Piece, fromSquare, toSquare));
+                MoveHistory.Add(new Move(turnNumber, toSquare.Piece, fromSquare, toSquare, queensideCastle, kingsideCastle, checkStatus));
             else
-                MoveHistory.Add(new Move(turnNumber, toSquare.Piece, capturedPiece, fromSquare, toSquare));
+                MoveHistory.Add(new Move(turnNumber, toSquare.Piece, capturedPiece, fromSquare, toSquare, queensideCastle, kingsideCastle, checkStatus));
         }
 
         public void AdvanceTurn()
@@ -232,7 +257,7 @@ namespace ChessGame.Classes
             GeneratePseudoLegalMoves();
         }
 
-        public List<Square> TraceDiagonal(Square square)
+        public List<Square> TraceDiagonal(Square square, Color activeColor)
         {
             List<Square> result = new List<Square>();
 
@@ -240,9 +265,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[x, y].Piece == null)
                     result.Add(Board.Squares[x, y]);
-                else if (Board.Squares[x, y].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[x, y].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[x, y]);
                     break;
@@ -252,9 +277,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[x, y].Piece == null)
                     result.Add(Board.Squares[x, y]);
-                else if (Board.Squares[x, y].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[x, y].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[x, y]);
                     break;
@@ -264,9 +289,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[x, y].Piece == null)
                     result.Add(Board.Squares[x, y]);
-                else if (Board.Squares[x, y].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[x, y].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[x, y]);
                     break;
@@ -276,9 +301,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[x, y].Piece == null)
                     result.Add(Board.Squares[x, y]);
-                else if (Board.Squares[x, y].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[x, y].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[x, y].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[x, y]);
                     break;
@@ -288,7 +313,7 @@ namespace ChessGame.Classes
             return result;
         }
 
-        public List<Square> TraceRow(Square square)
+        public List<Square> TraceRow(Square square, Color activeColor)
         {
             List<Square> result = new List<Square>();
 
@@ -296,9 +321,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[x, square.Column].Piece == null)
                     result.Add(Board.Squares[x, square.Column]);
-                else if (Board.Squares[x, square.Column].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[x, square.Column].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[x, square.Column].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[x, square.Column].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[x, square.Column]);
                     break;
@@ -308,9 +333,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[x, square.Column].Piece == null)
                     result.Add(Board.Squares[x, square.Column]);
-                else if (Board.Squares[x, square.Column].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[x, square.Column].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[x, square.Column].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[x, square.Column].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[x, square.Column]);
                     break;
@@ -320,9 +345,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[square.Row, y].Piece == null)
                     result.Add(Board.Squares[square.Row, y]);
-                else if (Board.Squares[square.Row, y].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[square.Row, y].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[square.Row, y].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[square.Row, y].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[square.Row, y]);
                     break;
@@ -332,9 +357,9 @@ namespace ChessGame.Classes
             {
                 if (Board.Squares[square.Row, y].Piece == null)
                     result.Add(Board.Squares[square.Row, y]);
-                else if (Board.Squares[square.Row, y].Piece.Color == ActivePlayer.Color)
+                else if (Board.Squares[square.Row, y].Piece.Color == activeColor)
                     break;
-                else if (Board.Squares[square.Row, y].Piece.Color != ActivePlayer.Color)
+                else if (Board.Squares[square.Row, y].Piece.Color != activeColor)
                 {
                     result.Add(Board.Squares[square.Row, y]);
                     break;
@@ -352,7 +377,7 @@ namespace ChessGame.Classes
             {
                 for (int j = square.Column - 1; j < square.Column + 2; j++)
                 {
-                    if ((i >= 0 && i <= 7 && j >= 0 && j <= 7) && (Board.Squares[i, j].Piece == null || Board.Squares[i, j].Piece.Color != ActivePlayer.Color))
+                    if ((i >= 0 && i <= 7 && j >= 0 && j <= 7) && (Board.Squares[i, j].Piece == null || Board.Squares[i, j].Piece.Color != square.Piece.Color))
                         result.Add(Board.Squares[i, j]);
                 }
             }
@@ -360,8 +385,8 @@ namespace ChessGame.Classes
             // Castling
             if (!square.Piece.HasMoved)
             {
-                if (Board.Squares[square.Row, square.Column + 1].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column + 1])
-                    && Board.Squares[square.Row, square.Column + 2].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column + 2]))
+                if (Board.Squares[square.Row, square.Column + 1].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column + 1], square.Piece.Color)
+                    && Board.Squares[square.Row, square.Column + 2].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column + 2], square.Piece.Color))
                 {
                     if ((square.Piece.Color == Color.White && Board.Squares[7, 7].Piece != null && !Board.Squares[7, 7].Piece.HasMoved)
                         || (square.Piece.Color == Color.Black && Board.Squares[0, 7].Piece != null && !Board.Squares[0, 7].Piece.HasMoved))
@@ -370,9 +395,9 @@ namespace ChessGame.Classes
                     }
                 }
 
-                if (Board.Squares[square.Row, square.Column - 1].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 1])
-                    && Board.Squares[square.Row, square.Column - 2].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 2])
-                    && Board.Squares[square.Row, square.Column - 3].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 3]))
+                if (Board.Squares[square.Row, square.Column - 1].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 1], square.Piece.Color)
+                    && Board.Squares[square.Row, square.Column - 2].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 2], square.Piece.Color)
+                    && Board.Squares[square.Row, square.Column - 3].Piece == null && !IsSquareAttacked(Board.Squares[square.Row, square.Column - 3], square.Piece.Color))
                 {
                     if ((square.Piece.Color == Color.White && Board.Squares[7, 0].Piece != null && !Board.Squares[7, 0].Piece.HasMoved)
                         || (square.Piece.Color == Color.Black && Board.Squares[0, 0].Piece != null && !Board.Squares[0, 0].Piece.HasMoved))
@@ -385,33 +410,33 @@ namespace ChessGame.Classes
             return result;
         }
 
-        public List<Square> FindKnightMoves(Square square)
+        public List<Square> FindKnightMoves(Square square, Color activeColor)
         {
             List<Square> result = new List<Square>();
             int x = square.Row, y = square.Column;
 
-            if ((x + 2 <= 7 && y + 1 <= 7) && (Board.Squares[x + 2, y + 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != ActivePlayer.Color))
+            if ((x + 2 <= 7 && y + 1 <= 7) && (Board.Squares[x + 2, y + 1].Piece == null || Board.Squares[x + 2, y + 1].Piece.Color != activeColor))
                 result.Add(Board.Squares[x + 2, y + 1]);
 
-            if ((x + 2 <= 7 && y - 1 >= 0) && (Board.Squares[x + 2, y - 1].Piece == null || Board.Squares[x + 2, y - 1].Piece.Color != ActivePlayer.Color))
+            if ((x + 2 <= 7 && y - 1 >= 0) && (Board.Squares[x + 2, y - 1].Piece == null || Board.Squares[x + 2, y - 1].Piece.Color != activeColor))
                 result.Add(Board.Squares[x + 2, y - 1]);
 
-            if ((x - 2 >= 0 && y + 1 <= 7) && (Board.Squares[x - 2, y + 1].Piece == null || Board.Squares[x - 2, y + 1].Piece.Color != ActivePlayer.Color))
+            if ((x - 2 >= 0 && y + 1 <= 7) && (Board.Squares[x - 2, y + 1].Piece == null || Board.Squares[x - 2, y + 1].Piece.Color != activeColor))
                 result.Add(Board.Squares[x - 2, y + 1]);
 
-            if ((x - 2 >= 0 && y - 1 >= 0) && (Board.Squares[x - 2, y - 1].Piece == null || Board.Squares[x - 2, y - 1].Piece.Color != ActivePlayer.Color))
+            if ((x - 2 >= 0 && y - 1 >= 0) && (Board.Squares[x - 2, y - 1].Piece == null || Board.Squares[x - 2, y - 1].Piece.Color != activeColor))
                 result.Add(Board.Squares[x - 2, y - 1]);
 
-            if ((x + 1 <= 7 && y + 2 <= 7) && (Board.Squares[x + 1, y + 2].Piece == null || Board.Squares[x + 1, y + 2].Piece.Color != ActivePlayer.Color))
+            if ((x + 1 <= 7 && y + 2 <= 7) && (Board.Squares[x + 1, y + 2].Piece == null || Board.Squares[x + 1, y + 2].Piece.Color != activeColor))
                 result.Add(Board.Squares[x + 1, y + 2]);
 
-            if ((x + 1 <= 7 && y - 2 >= 0) && (Board.Squares[x + 1, y - 2].Piece == null || Board.Squares[x + 1, y - 2].Piece.Color != ActivePlayer.Color))
+            if ((x + 1 <= 7 && y - 2 >= 0) && (Board.Squares[x + 1, y - 2].Piece == null || Board.Squares[x + 1, y - 2].Piece.Color != activeColor))
                 result.Add(Board.Squares[x + 1, y - 2]);
 
-            if ((x - 1 >= 0 && y + 2 <= 7) && (Board.Squares[x - 1, y + 2].Piece == null || Board.Squares[x - 1, y + 2].Piece.Color != ActivePlayer.Color))
+            if ((x - 1 >= 0 && y + 2 <= 7) && (Board.Squares[x - 1, y + 2].Piece == null || Board.Squares[x - 1, y + 2].Piece.Color != activeColor))
                 result.Add(Board.Squares[x - 1, y + 2]);
 
-            if ((x - 1 >= 0 && y - 2 >= 0) && (Board.Squares[x - 1, y - 2].Piece == null || Board.Squares[x - 1, y - 2].Piece.Color != ActivePlayer.Color))
+            if ((x - 1 >= 0 && y - 2 >= 0) && (Board.Squares[x - 1, y - 2].Piece == null || Board.Squares[x - 1, y - 2].Piece.Color != activeColor))
                 result.Add(Board.Squares[x - 1, y - 2]);
 
             return result;
@@ -428,16 +453,16 @@ namespace ChessGame.Classes
                 switch (pawn.PromotedPiece.Type)
                 {
                     case PieceType.Bishop:
-                        result = TraceDiagonal(Board.Squares[x, y]).ToList();
+                        result = TraceDiagonal(Board.Squares[x, y], ActivePlayer.Color).ToList();
                         break;
                     case PieceType.Knight:
-                        result = FindKnightMoves(Board.Squares[x, y]);
+                        result = FindKnightMoves(Board.Squares[x, y], ActivePlayer.Color);
                         break;
                     case PieceType.Queen:
-                        result = TraceDiagonal(Board.Squares[x, y]).Concat(TraceRow(Board.Squares[x, y])).ToList();
+                        result = TraceDiagonal(Board.Squares[x, y], ActivePlayer.Color).Concat(TraceRow(Board.Squares[x, y], ActivePlayer.Color)).ToList();
                         break;
                     case PieceType.Rook:
-                        result = TraceDiagonal(Board.Squares[x, y]);
+                        result = TraceDiagonal(Board.Squares[x, y], ActivePlayer.Color);
                         break;
                 }
             }
@@ -565,16 +590,32 @@ namespace ChessGame.Classes
             return null;
         }
 
-        public bool IsSquareAttacked(Square square)
+        public bool IsSquareAttacked(Square square, Color defenderColor)
         {
-            List<Square> diagonalAttacks = TraceDiagonal(square);
-            List<Square> rowAttacks = TraceRow(square);
-            List<Square> knightAttacks = FindKnightMoves(square);
+            List<Square> diagonalAttacks = TraceDiagonal(square, defenderColor);
+            List<Square> rowAttacks = TraceRow(square, defenderColor);
+            List<Square> knightAttacks = FindKnightMoves(square, defenderColor);
 
             foreach (Square s in diagonalAttacks)
             {
-                if (s.Piece != null && (s.Piece.Type == PieceType.Bishop || s.Piece.Type == PieceType.Pawn || s.Piece.Type == PieceType.Queen))
-                    return true;
+                if (s.Piece != null)
+                {
+                    if (s.Piece.Type == PieceType.Bishop || s.Piece.Type == PieceType.Queen)
+                        return true;
+                    else if (s.Piece.Type == PieceType.Pawn && (s.Column + 1 == square.Column || s.Column - 1 == square.Column))
+                    {
+                        if (s.Piece.Color == Color.White && s.Row != 0)
+                        {
+                            if (s.Row - 1 == square.Row)
+                                return true;
+                        }
+                        else if (s.Piece.Color == Color.Black && s.Row != 7)
+                        {
+                            if (s.Row + 1 == square.Row)
+                                return true;
+                        }
+                    }
+                }
             }
 
             foreach (Square s in rowAttacks)
@@ -600,22 +641,22 @@ namespace ChessGame.Classes
                 switch (piece.Type)
                 {
                     case PieceType.Bishop:
-                        piece.PseudoLegalMoves = TraceDiagonal(piece.Square);
+                        piece.PseudoLegalMoves = TraceDiagonal(piece.Square, ActivePlayer.Color);
                         break;
                     case PieceType.King:
                         piece.PseudoLegalMoves = FindKingMoves(piece.Square);
                         break;
                     case PieceType.Knight:
-                        piece.PseudoLegalMoves = FindKnightMoves(piece.Square);
+                        piece.PseudoLegalMoves = FindKnightMoves(piece.Square, ActivePlayer.Color);
                         break;
                     case PieceType.Pawn:
                         piece.PseudoLegalMoves = FindPawnMoves(piece.Square);
                         break;
                     case PieceType.Queen:
-                        piece.PseudoLegalMoves = TraceDiagonal(piece.Square).Concat(TraceRow(piece.Square)).ToList();
+                        piece.PseudoLegalMoves = TraceDiagonal(piece.Square, ActivePlayer.Color).Concat(TraceRow(piece.Square, ActivePlayer.Color)).ToList();
                         break;
                     case PieceType.Rook:
-                        piece.PseudoLegalMoves = TraceRow(piece.Square);
+                        piece.PseudoLegalMoves = TraceRow(piece.Square, ActivePlayer.Color);
                         break;
                 }
             }
