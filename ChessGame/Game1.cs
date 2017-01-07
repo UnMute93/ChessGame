@@ -463,7 +463,7 @@ namespace ChessGame
         public void DrawPause(float deltaTime, GameTime gameTime)
         {
             spriteBatch.Begin();
-            spriteBatch.DrawString(pausedGame, "Game is Paused!", new Vector2(450, 250), Microsoft.Xna.Framework.Color.White);
+            spriteBatch.DrawString(pausedGame, "Game is paused!", new Vector2(450, 250), Microsoft.Xna.Framework.Color.White);
             spriteBatch.Draw(btnPaus, new Vector2(455, 500), Microsoft.Xna.Framework.Color.White);
             spriteBatch.End();
             base.Draw(gameTime);
