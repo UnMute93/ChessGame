@@ -70,7 +70,7 @@ namespace ChessGame.Classes
             if (CapturedPiece != null)
                 result += "x";
 
-            if (FromSquare.)switch (ToSquare.Column)
+            switch (ToSquare.Column)
             {
                 case 0:
                     result += "a";
