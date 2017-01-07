@@ -51,19 +51,19 @@ namespace ChessGame.Classes
                     result += "B";
                     break;
                 case PieceType.King:
-                    result += "B";
+                    result += "K";
                     break;
                 case PieceType.Knight:
-                    result += "B";
+                    result += "N";
                     break;
                 case PieceType.Pawn:
-                    result += "B";
+                    result += "";
                     break;
                 case PieceType.Queen:
-                    result += "B";
+                    result += "Q";
                     break;
                 case PieceType.Rook:
-                    result += "B";
+                    result += "R";
                     break;
             }
 
