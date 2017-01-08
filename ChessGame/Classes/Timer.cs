@@ -42,7 +42,7 @@ namespace ChessGame.Classes
 
         public void Update(GameTime gameTime)
         {
-
+            
         }
 
         public void Draw(GameTime gameTime)

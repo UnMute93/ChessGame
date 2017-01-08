@@ -56,7 +56,6 @@ namespace ChessGame
             Playing,
             Paused,
             EndGame
-            
         }
 
         public enum GameModes
