@@ -12,6 +12,7 @@ namespace ChessGame
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Chess chess;
+      
         MouseState currentMouseState;
         MouseState previousMouseState;
         private Texture2D btnStart;
@@ -26,8 +27,7 @@ namespace ChessGame
         SpriteFont player1time;
         SpriteFont player2time;
         SpriteFont pausedGame;
-        double timeDouble;
-        double stopTime;
+        bool checkNormal;
 
 
 
@@ -48,6 +48,7 @@ namespace ChessGame
         bool pause = false;
         bool mainMenuButton = false;
         bool resetButton = false;
+
 
         public enum GameStates
         {
@@ -183,7 +184,9 @@ namespace ChessGame
 
         public void UpdateGameMode(float deltaTime)
         {
-            
+            chess.Timers[0] = new Timer(30, Classes.Color.White);
+            chess.Timers[1] = new Timer(30, Classes.Color.Black);
+     
             previousMouseState = currentMouseState;
             currentMouseState = Mouse.GetState();
             Vector2 mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
@@ -202,21 +205,33 @@ namespace ChessGame
                     _gameMode = GameModes.Normal;
                     _gameState = GameStates.Playing;
                 }
+
                 if (mousePos.X >= buttonBlitz.X && mousePos.X <= buttonBlitz.X + btnModeBlitz.Width
                     && mousePos.Y >= buttonBlitz.Y && mousePos.Y <= buttonBlitz.Y + btnModeBlitz.Height)
                 {
+                    chess.Timers[0].Start();
+                    chess.Timers[1].Start();
+
                     _gameMode = GameModes.Blitz;
                     _gameState = GameStates.Playing;
                 }
+
                 if (mousePos.X >= buttonRapid.X && mousePos.X <= buttonRapid.X + btnModeRapid.Width
                     && mousePos.Y >= buttonRapid.Y && mousePos.Y <= buttonRapid.Y + btnModeRapid.Height)
                 {
+                    chess.Timers[0].Start();
+                    chess.Timers[1].Start();
+
                     _gameMode = GameModes.Rapid;
                     _gameState = GameStates.Playing;
                 }
+
                 if (mousePos.X >= buttonBullet.X && mousePos.X <= buttonBullet.X + btnModeBullet.Width
                     && mousePos.Y >= buttonBullet.Y && mousePos.Y <= buttonBullet.Y + btnModeBullet.Height)
                 {
+                    chess.Timers[0].Start();
+                    chess.Timers[1].Start();
+
                     _gameMode = GameModes.Bullet;
                     _gameState = GameStates.Playing;
                 }
@@ -231,15 +246,38 @@ namespace ChessGame
             currentMouseState = Mouse.GetState();
             Vector2 mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
             Vector2 buttonPause = new Vector2(960, 400);
-            timeDouble++;
 
+            if (_gameMode == GameModes.Normal)
+            {
+                checkNormal = true;
+                _gameMode = GameModes.LoopStopper;
+            }
+            else if (_gameMode == GameModes.Blitz)
+            {
+                checkNormal = false;
+                _gameMode = GameModes.LoopStopper;
+            }
+            else if (_gameMode == GameModes.Bullet)
+            {
+                checkNormal = false;
+                _gameMode = GameModes.LoopStopper;
+            }
+            else if (_gameMode == GameModes.Rapid)
+            {
+                checkNormal = false;
+                _gameMode = GameModes.LoopStopper;
+            }
+   
             if (currentMouseState.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton != ButtonState.Pressed)
             {
 
                 if (mousePos.X >= buttonPause.X && mousePos.X <= buttonPause.X + btnPausGame.Width
                     && mousePos.Y >= buttonPause.Y && mousePos.Y <= buttonPause.Y + btnPausGame.Height)
                 {
-                    stopTime = timeDouble;
+                    if (_gameMode != GameModes.Normal)
+                    {
+
+                    }
                     _gameState = GameStates.Paused;
                 }
             }
@@ -297,34 +335,12 @@ namespace ChessGame
                 
             }
 
-            //Beroende på vilken gamemode så ska timer ändras...
-            //Needs some tweaking
-            //if (_gameMode == GameModes.Normal)
-            //{
-
-            //    _gameMode = GameModes.LoopStopper;
-            //}
-            //else if (_gameMode == GameModes.Blitz)
-            //{
-
-            //    _gameMode = GameModes.LoopStopper;
-            //}
-            //else if (_gameMode == GameModes.Bullet)
-            //{
-
-            //    _gameMode = GameModes.LoopStopper;
-            //}
-            //else if (_gameMode == GameModes.Rapid)
-            //{
-
-            //    _gameMode = GameModes.LoopStopper;
-            //}
           
         }
 
         public void UpdatePause(float deltaTime)
         {
-            timeDouble = stopTime;
+            
             previousMouseState = currentMouseState;
             currentMouseState = Mouse.GetState();
             Vector2 mousePos = new Vector2(currentMouseState.X, currentMouseState.Y);
@@ -369,7 +385,7 @@ namespace ChessGame
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.TransparentBlack);
+            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.DarkCyan);
             base.Draw(gameTime);
             switch (_gameState)
             {
@@ -429,32 +445,37 @@ namespace ChessGame
             }
             
 
-            //Beroende på vilken gamemode så ska timer ändras...
-            //Needs some tweaking
+
             if (_gameModeHolder == GameModes.Normal)
             {
                 spriteBatch.Draw(btnModeNormal, new Vector2(960, 25), Microsoft.Xna.Framework.Color.White);
-             //   _gameMode = GameModes.LoopStopper;
+             
             }
             else if (_gameModeHolder == GameModes.Blitz)
             {
                 spriteBatch.Draw(btnModeBlitz, new Vector2(960, 25), Microsoft.Xna.Framework.Color.White);
-              //  _gameMode = GameModes.LoopStopper;
+              
             }
             else if (_gameModeHolder == GameModes.Bullet)
             {
                 spriteBatch.Draw(btnModeBullet, new Vector2(960, 25), Microsoft.Xna.Framework.Color.White);
-              //  _gameMode = GameModes.LoopStopper;
+           
             }
             else if (_gameModeHolder == GameModes.Rapid)
             {
                 spriteBatch.Draw(btnModeRapid, new Vector2(960, 25), Microsoft.Xna.Framework.Color.White);
-             //   _gameMode = GameModes.LoopStopper;
+            
             }
-           
-            spriteBatch.DrawString(player1time, "Time: " + timeDouble + ".", new Vector2(965, 150), Microsoft.Xna.Framework.Color.White);
-            spriteBatch.Draw(btnPausGame, new Vector2(960, 400), Microsoft.Xna.Framework.Color.White);
-            spriteBatch.DrawString(player2time, "Time: " + timeDouble + ".", new Vector2(965, 700), Microsoft.Xna.Framework.Color.White);
+
+         
+            if (checkNormal == false)
+            {
+                spriteBatch.DrawString(player1time, "Time: " + chess.Timers[0].Text, new Vector2(965, 150), Microsoft.Xna.Framework.Color.White);
+                spriteBatch.Draw(btnPausGame, new Vector2(960, 400), Microsoft.Xna.Framework.Color.White);
+                spriteBatch.DrawString(player2time, "Time: " + chess.Timers[1].Text, new Vector2(965, 700), Microsoft.Xna.Framework.Color.White);
+            }
+
+            
 
             spriteBatch.End();
             base.Draw(gameTime);
