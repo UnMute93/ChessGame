@@ -206,9 +206,10 @@ namespace ChessGame.Classes
                         oppositeKingSquare = piece.Square;
                 }
                 IsCheck(oppositeKingSquare);
-
-
                 AddToMoveHistory(fromSquare, toSquare, capturedPiece, queensideCastle, kingsideCastle, CheckStatus);
+
+
+
                 AdvanceTurn();
                 return true;
             }
