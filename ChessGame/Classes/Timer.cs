@@ -40,9 +40,20 @@ namespace ChessGame.Classes
             Paused = true;
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(float deltaTime)
         {
-            
+            if (Time > 0)
+            {
+                if (!Paused)
+                {
+                    Time -= deltaTime;
+                    Text = String.Format("{0}:{1:00}", (int)Time / 60, (int)Time % 60);
+                }
+            }
+            else
+            {
+                Finished = true;
+            }
         }
 
         /*public void Draw(GameTime gameTime)

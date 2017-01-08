@@ -36,16 +36,18 @@ namespace ChessGame.Classes
         public CheckStatus CheckStatus { get; set; }
         public ContentManager Content { get; set; }
 
-        public Chess(Vector2 scale)
+        public Chess(Vector2 scale, ContentManager content, float timerValue)
         {
             Players = new Player[2];
             Players[0] = new Player("Player 1", Color.White);
             Players[1] = new Player("Player 2", Color.Black);
             Timers = new Timer[2];
-            Timers[0] = new Timer(100.0f, Color.White);
-            Timers[1] = new Timer(100.0f, Color.Black);
+            Timers[0] = new Timer(timerValue, Color.White);
+            Timers[1] = new Timer(timerValue, Color.Black);
+            Timers[1].Pause();
             Board = new Board(scale);
             MoveHistory = new List<Move>();
+            Content = content;
             ActivePlayer = Players[0];
             CheckStatus = CheckStatus.None;
             GeneratePseudoLegalMoves();
@@ -207,6 +209,7 @@ namespace ChessGame.Classes
                 }
                 IsCheck(oppositeKingSquare);
                 AddToMoveHistory(fromSquare, toSquare, capturedPiece, queensideCastle, kingsideCastle, CheckStatus);
+                String history = MoveHistory.Last().ToString();
 
 
 
@@ -235,9 +238,17 @@ namespace ChessGame.Classes
         public void AdvanceTurn()
         {
             if (ActivePlayer == Players[0])
+            {
                 ActivePlayer = Players[1];
+                Timers[0].Pause();
+                Timers[1].Start();
+            }
             else
+            {
                 ActivePlayer = Players[0];
+                Timers[1].Pause();
+                Timers[0].Start();
+            }
 
             foreach (Piece piece in Board.Pieces)
             {

@@ -45,7 +45,7 @@ namespace ChessGame.Classes
 
             String result = "";
 
-            switch (FromSquare.Piece.Type)
+            switch (Piece.Type)
             {
                 case PieceType.Bishop:
                     result += "B";
@@ -57,7 +57,36 @@ namespace ChessGame.Classes
                     result += "N";
                     break;
                 case PieceType.Pawn:
-                    result += "";
+                    if (CapturedPiece != null)
+                    {
+                        switch (FromSquare.Column)
+                        {
+                            case 0:
+                                result += "a";
+                                break;
+                            case 1:
+                                result += "b";
+                                break;
+                            case 2:
+                                result += "c";
+                                break;
+                            case 3:
+                                result += "d";
+                                break;
+                            case 4:
+                                result += "e";
+                                break;
+                            case 5:
+                                result += "f";
+                                break;
+                            case 6:
+                                result += "g";
+                                break;
+                            case 7:
+                                result += "h";
+                                break;
+                        }
+                    }
                     break;
                 case PieceType.Queen:
                     result += "Q";
@@ -126,9 +155,9 @@ namespace ChessGame.Classes
                     break;
             }
 
-            if ((FromSquare.Piece.Color == Color.White && CheckStatus == CheckStatus.WhiteCheckedBlack) || (FromSquare.Piece.Color == Color.Black && CheckStatus == CheckStatus.BlackCheckedWhite))
+            if ((Piece.Color == Color.White && CheckStatus == CheckStatus.WhiteCheckedBlack) || (Piece.Color == Color.Black && CheckStatus == CheckStatus.BlackCheckedWhite))
                 result += "+";
-            else if ((FromSquare.Piece.Color == Color.White && CheckStatus == CheckStatus.WhiteCheckmatedBlack) || (FromSquare.Piece.Color == Color.Black && CheckStatus == CheckStatus.BlackCheckmatedWhite))
+            else if ((Piece.Color == Color.White && CheckStatus == CheckStatus.WhiteCheckmatedBlack) || (Piece.Color == Color.Black && CheckStatus == CheckStatus.BlackCheckmatedWhite))
                 result += "#";
 
             return result;
